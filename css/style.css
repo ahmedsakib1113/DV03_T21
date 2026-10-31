@@ -1,0 +1,7 @@
+/* Shared starter styles; extend on a feature branch. */
+:root { font-family: system-ui, sans-serif; color: #172b4d; background: #f5f7fa; }
+body { margin: 0; line-height: 1.6; }
+header, main, footer { max-width: 70rem; margin: auto; padding: 1.5rem; }
+header { border-bottom: 3px solid #1d617a; }
+h1 { line-height: 1.2; }
+section { background: white; padding: 1.5rem; border-radius: .5rem; }
