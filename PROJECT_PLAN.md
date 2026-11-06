@@ -20,6 +20,8 @@ Other team member:Weelinton , Yibo
 - Recorded the project topic: hospitalized road traffic injuries in Australia, 2011–2021.
 - Added the WhatsApp channel and shared report link to the project plan.
 - Recorded regular meetings: Saturday at 2 PM.
+- allocate work based on everyone's expertise (Sakib Ahmed: Github, Weelinton: Report, Yibo: Knime)
+
 2. What will you complete before the next stand-up?
 Suggested plan:
 - Allocate tasks among team members.
@@ -28,6 +30,9 @@ Suggested plan:
 - Finalize research questions.
 - Sketch charts and the dashboard layout.
 - Update the shared report.
+- Preliminary investigation and sorting of Projects and Datasets
+- Exploration Data Analysis
+
 3. What obstacles are you facing?
 - Learning how to collaborate using branches and pull requests.
 - Coordinating team availability and tasks.
