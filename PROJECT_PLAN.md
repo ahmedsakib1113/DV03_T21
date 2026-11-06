@@ -49,5 +49,9 @@ Suggested plan:
 5.How do injury numbers differ among road user groups, such as vehicle occupants, motorcyclists, cyclists, and pedestrians?
 
 # Elective Question?
-Within the comparable window 2016–2021, do the road users and age groups that contribute the most hospitalisations also contribute the most bed days?
+1. To what extent did the 2011–2021 change in national hospitalised road injuries reflect a shift in road-user composition, rather than a uniform rise and fall across road users? Did the 2020 disruption leave pedal cyclists at a higher share in 2021?
+2. In which age-by-road-user groups did hospitalised injury counts rise between 2011 and 2021? Did the increase among older adults occur among pedestrians, or among car drivers and pedal cyclists?
+3. Within the comparable window 2016–2021, do the road users and age groups that contribute the most hospitalisations also contribute the most bed days?
+4. Inside each jurisdiction’s comparable period — Victoria from 2012, New South Wales from 2017, and the other jurisdictions across 2011–2021 — did road-user composition move in the same direction?
+5. Did the rise in First Nations hospitalised injury counts follow the national shift toward pedal cyclists, or a different road-user and remoteness pattern? Which comparisons remain valid once status-not-stated and suppressed cells are taken into account?
 
