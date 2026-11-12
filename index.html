@@ -1,16 +1,160 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>DV03_T21 | Road Injury Visualization</title>
-  <link rel="stylesheet" href="css/style.css">
-  <script src="js/main.js" defer></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Road Traffic Injuries | DV03_T21</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="js/main.js" defer></script>
 </head>
 <body>
-  <header><p>COS30045 · Class 03 · Group 21</p><h1>Hospitalised Road Traffic Injuries in Australia</h1></header>
-  <main><section aria-labelledby="project-status"><h2 id="project-status">Project in development</h2><p>This starter website will present an interactive data story using BITRE hospitalised injury data for 2011–2021.</p><p>Research questions, data processing, charts, and interactions are being planned. No analysis results are presented yet.</p></section></main>
-  <footer><p>DV03_T21 · Semester 2, 2026</p></footer>
+<header>
+  <div class="wrap">
+    <p>COS30045 · DV03_T21</p>
+    <h1>Hospitalized Road Traffic Injuries in Australia</h1>
+    <p>BITRE data · 2011–2021</p>
+  </div>
+</header>
+<main class="wrap">
+  <nav aria-label="Research question sets">
+    <a href="#key">Key questions</a>
+    <a href="#elective">Elective questions</a>
+  </nav>
+<section id="key" aria-labelledby="key-title">
+  <h2 id="key-title">Five key research questions</h2>
+  <nav aria-label="Key question navigation">
+    <a href="#key-1">National trend</a>
+    <a href="#key-2">States and territories</a>
+    <a href="#key-3">Age groups</a>
+    <a href="#key-4">Sex comparison</a>
+    <a href="#key-5">Road-user groups</a>
+  </nav>
+  <div class="grid">
+    <article id="key-1">
+      <h3>National trend</h3>
+      <p>How did hospitalized road traffic injuries in Australia change between 2011 and 2021?</p>
+      <figure>
+        <div class="chart">
+          <img hidden data-src="assets/charts/key-1.png" alt="National trend chart">
+          <p class="placeholder">Awaiting KNIME chart export</p>
+        </div>
+        <figcaption>Line chart · Year × hospitalizations</figcaption>
+      </figure>
+    </article>
+    <article id="key-2">
+      <h3>States and territories</h3>
+      <p>How do hospitalized road traffic injuries vary across Australian states and territories?</p>
+      <figure>
+        <div class="chart">
+          <img hidden data-src="assets/charts/key-2.png" alt="States and territories chart">
+          <p class="placeholder">Awaiting KNIME chart export</p>
+        </div>
+        <figcaption>Horizontal bars · State or territory × hospitalizations</figcaption>
+      </figure>
+    </article>
+    <article id="key-3">
+      <h3>Age groups</h3>
+      <p>Which age groups account for the highest numbers of hospitalized road traffic injuries?</p>
+      <figure>
+        <div class="chart">
+          <img hidden data-src="assets/charts/key-3.png" alt="Age groups chart">
+          <p class="placeholder">Awaiting KNIME chart export</p>
+        </div>
+        <figcaption>Horizontal bars · Age group × hospitalizations</figcaption>
+      </figure>
+    </article>
+    <article id="key-4">
+      <h3>Sex comparison</h3>
+      <p>How do hospitalized road traffic injuries differ between males and females?</p>
+      <figure>
+        <div class="chart">
+          <img hidden data-src="assets/charts/key-4.png" alt="Sex comparison chart">
+          <p class="placeholder">Awaiting KNIME chart export</p>
+        </div>
+        <figcaption>Two line series · Year × hospitalizations</figcaption>
+      </figure>
+    </article>
+    <article id="key-5">
+      <h3>Road-user groups</h3>
+      <p>How do injury numbers differ among road user groups, such as vehicle occupants, motorcyclists, cyclists, and pedestrians?</p>
+      <figure>
+        <div class="chart">
+          <img hidden data-src="assets/charts/key-5.png" alt="Road-user groups chart">
+          <p class="placeholder">Awaiting KNIME chart export</p>
+        </div>
+        <figcaption>Horizontal bars · Road-user group × hospitalizations</figcaption>
+      </figure>
+    </article>
+  </div>
+</section>
+<section id="elective" aria-labelledby="elective-title">
+  <h2 id="elective-title">Elective questions</h2>
+  <nav aria-label="Elective question navigation">
+    <a href="#elective-1">National road-user share</a>
+    <a href="#elective-2">Age by road user</a>
+    <a href="#elective-3">Hospitalizations and bed days</a>
+    <a href="#elective-4">Jurisdiction trends</a>
+    <a href="#elective-5">First Nations patterns</a>
+  </nav>
+  <div class="grid">
+    <article id="elective-1">
+      <h3>National road-user share</h3>
+      <p>To what extent did the 2011–2021 change in national hospitalised road injuries reflect a shift in road-user composition, rather than a uniform rise and fall across road users? Did the 2020 disruption leave pedal cyclists at a higher share in 2021?</p>
+      <figure>
+        <div class="chart">
+          <img hidden data-src="assets/charts/elective-1.png" alt="National road-user share chart">
+          <p class="placeholder">Awaiting KNIME chart export</p>
+        </div>
+        <figcaption>Line chart · Year × share of hospitalizations (%)</figcaption>
+      </figure>
+    </article>
+    <article id="elective-2">
+      <h3>Age by road user</h3>
+      <p>In which age-by-road-user groups did hospitalised injury counts rise between 2011 and 2021? Did the increase among older adults occur among pedestrians, or among car drivers and pedal cyclists?</p>
+      <figure>
+        <div class="chart">
+          <img hidden data-src="assets/charts/elective-2.png" alt="Age by road user chart">
+          <p class="placeholder">Awaiting KNIME chart export</p>
+        </div>
+        <figcaption>Heatmap · Age group × road user · Change in count</figcaption>
+      </figure>
+    </article>
+    <article id="elective-3">
+      <h3>Hospitalizations and bed days</h3>
+      <p>Within the comparable window 2016–2021, do the road users and age groups that contribute the most hospitalisations also contribute the most bed days?</p>
+      <figure>
+        <div class="chart">
+          <img hidden data-src="assets/charts/elective-3.png" alt="Hospitalizations and bed days chart">
+          <p class="placeholder">Awaiting KNIME chart export</p>
+        </div>
+        <figcaption>Paired rankings · Hospitalizations and bed days, 2016–2021</figcaption>
+      </figure>
+    </article>
+    <article id="elective-4">
+      <h3>Jurisdiction trends</h3>
+      <p>Inside each jurisdiction’s comparable period — Victoria from 2012, New South Wales from 2017, and the other jurisdictions across 2011–2021 — did road-user composition move in the same direction?</p>
+      <figure>
+        <div class="chart">
+          <img hidden data-src="assets/charts/elective-4.png" alt="Jurisdiction trends chart">
+          <p class="placeholder">Awaiting KNIME chart export</p>
+        </div>
+        <figcaption>Small multiples · Year × road-user share within each jurisdiction</figcaption>
+      </figure>
+    </article>
+    <article id="elective-5">
+      <h3>First Nations patterns</h3>
+      <p>Did the rise in First Nations hospitalised injury counts follow the national shift toward pedal cyclists, or a different road-user and remoteness pattern? Which comparisons remain valid once status-not-stated and suppressed cells are taken into account?</p>
+      <figure>
+        <div class="chart">
+          <img hidden data-src="assets/charts/elective-5.png" alt="First Nations patterns chart">
+          <p class="placeholder">Awaiting KNIME chart export</p>
+        </div>
+        <figcaption>Trend and remoteness views · Flag suppressed and status-not-stated values</figcaption>
+      </figure>
+    </article>
+  </div>
+</section>
+</main>
+<footer class="wrap"><p><a href="https://github.com/ahmedsakib1113/DV03_T21/blob/main/PROJECT_PLAN.md">DV03_T21 project plan</a></p></footer>
 </body>
 </html>
-

@@ -1,7 +1,25 @@
-/* Shared starter styles; extend on a feature branch. */
-:root { font-family: system-ui, sans-serif; color: #172b4d; background: #f5f7fa; }
-body { margin: 0; line-height: 1.6; }
-header, main, footer { max-width: 70rem; margin: auto; padding: 1.5rem; }
-header { border-bottom: 3px solid #1d617a; }
-h1 { line-height: 1.2; }
-section { background: white; padding: 1.5rem; border-radius: .5rem; }
+:root { color-scheme: light; font-family: system-ui, sans-serif; color: #152939; background: #f1f6f7; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+header { color: #fff; background: #103544; padding: 3.5rem 1.25rem 2.5rem; border-bottom: .35rem solid #56c6af; }
+.wrap { max-width: 70rem; margin-inline: auto; }
+main, footer { padding: 0 1.25rem; }
+header p { margin: 0 0 .65rem; color: #bfe2dc; }
+h1 { font-size: clamp(2.05rem, 6vw, 3.8rem); line-height: 1.05; margin: 0 0 1rem; max-width: 19ch; }
+nav { display: flex; flex-wrap: wrap; gap: .5rem; margin-block: 1rem; }
+a { color: #07594f; text-underline-offset: .18em; }
+nav a { padding: .5rem .75rem; border-radius: .4rem; background: #deeeeb; }
+:focus-visible { outline: 3px solid #b24d15; outline-offset: 3px; }
+section { margin: 2rem 0 3rem; }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+article { background: #fff; border: 1px solid #cbdcdf; border-radius: .65rem; padding: 1.2rem; display: flex; flex-direction: column; scroll-margin-top: 1rem; }
+article:target { outline: 3px solid #16796c; }
+article h3 { margin: 0; font-size: 1.22rem; }
+article > p { line-height: 1.5; margin: .55rem 0 1rem; }
+figure { margin: auto 0 0; }
+.chart { min-height: 10rem; border: 1px dashed #809fa7; background: #f4f9fa; border-radius: .4rem; display: grid; place-items: center; padding: .6rem; }
+img { max-width: 100%; height: auto; }
+figcaption, .placeholder { color: #435a64; font-size: .92rem; }
+figcaption { margin-top: .55rem; }
+footer p { padding-block: 1rem; border-top: 1px solid #cbdcdf; }
+@media (max-width: 42rem) { .grid { grid-template-columns: 1fr; } }
