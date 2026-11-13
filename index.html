@@ -1,160 +1,117 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Road Traffic Injuries | DV03_T21</title>
-<link rel="stylesheet" href="css/style.css">
-<script src="js/main.js" defer></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore five research questions about hospitalised road traffic injuries in Australia through interactive charts and an Australia map, using Yibo’s BITRE analysis.">
+  <meta name="theme-color" content="#103544">
+  <title>Road Injury Research | DV03_T21</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="assets/vendor/d3.v7.min.js" defer></script>
+  <script src="js/main.js" defer></script>
 </head>
 <body>
-<header>
-  <div class="wrap">
-    <p>COS30045 · DV03_T21</p>
-    <h1>Hospitalized Road Traffic Injuries in Australia</h1>
-    <p>BITRE data · 2011–2021</p>
-  </div>
-</header>
-<main class="wrap">
-  <nav aria-label="Research question sets">
-    <a href="#key">Key questions</a>
-    <a href="#elective">Elective questions</a>
-  </nav>
-<section id="key" aria-labelledby="key-title">
-  <h2 id="key-title">Five key research questions</h2>
-  <nav aria-label="Key question navigation">
-    <a href="#key-1">National trend</a>
-    <a href="#key-2">States and territories</a>
-    <a href="#key-3">Age groups</a>
-    <a href="#key-4">Sex comparison</a>
-    <a href="#key-5">Road-user groups</a>
-  </nav>
-  <div class="grid">
-    <article id="key-1">
-      <h3>National trend</h3>
-      <p>How did hospitalized road traffic injuries in Australia change between 2011 and 2021?</p>
-      <figure>
-        <div class="chart">
-          <img hidden data-src="assets/charts/key-1.png" alt="National trend chart">
-          <p class="placeholder">Awaiting KNIME chart export</p>
-        </div>
-        <figcaption>Line chart · Year × hospitalizations</figcaption>
-      </figure>
-    </article>
-    <article id="key-2">
-      <h3>States and territories</h3>
-      <p>How do hospitalized road traffic injuries vary across Australian states and territories?</p>
-      <figure>
-        <div class="chart">
-          <img hidden data-src="assets/charts/key-2.png" alt="States and territories chart">
-          <p class="placeholder">Awaiting KNIME chart export</p>
-        </div>
-        <figcaption>Horizontal bars · State or territory × hospitalizations</figcaption>
-      </figure>
-    </article>
-    <article id="key-3">
-      <h3>Age groups</h3>
-      <p>Which age groups account for the highest numbers of hospitalized road traffic injuries?</p>
-      <figure>
-        <div class="chart">
-          <img hidden data-src="assets/charts/key-3.png" alt="Age groups chart">
-          <p class="placeholder">Awaiting KNIME chart export</p>
-        </div>
-        <figcaption>Horizontal bars · Age group × hospitalizations</figcaption>
-      </figure>
-    </article>
-    <article id="key-4">
-      <h3>Sex comparison</h3>
-      <p>How do hospitalized road traffic injuries differ between males and females?</p>
-      <figure>
-        <div class="chart">
-          <img hidden data-src="assets/charts/key-4.png" alt="Sex comparison chart">
-          <p class="placeholder">Awaiting KNIME chart export</p>
-        </div>
-        <figcaption>Two line series · Year × hospitalizations</figcaption>
-      </figure>
-    </article>
-    <article id="key-5">
-      <h3>Road-user groups</h3>
-      <p>How do injury numbers differ among road user groups, such as vehicle occupants, motorcyclists, cyclists, and pedestrians?</p>
-      <figure>
-        <div class="chart">
-          <img hidden data-src="assets/charts/key-5.png" alt="Road-user groups chart">
-          <p class="placeholder">Awaiting KNIME chart export</p>
-        </div>
-        <figcaption>Horizontal bars · Road-user group × hospitalizations</figcaption>
-      </figure>
-    </article>
-  </div>
-</section>
-<section id="elective" aria-labelledby="elective-title">
-  <h2 id="elective-title">Elective questions</h2>
-  <nav aria-label="Elective question navigation">
-    <a href="#elective-1">National road-user share</a>
-    <a href="#elective-2">Age by road user</a>
-    <a href="#elective-3">Hospitalizations and bed days</a>
-    <a href="#elective-4">Jurisdiction trends</a>
-    <a href="#elective-5">First Nations patterns</a>
-  </nav>
-  <div class="grid">
-    <article id="elective-1">
-      <h3>National road-user share</h3>
-      <p>To what extent did the 2011–2021 change in national hospitalised road injuries reflect a shift in road-user composition, rather than a uniform rise and fall across road users? Did the 2020 disruption leave pedal cyclists at a higher share in 2021?</p>
-      <figure>
-        <div class="chart">
-          <img hidden data-src="assets/charts/elective-1.png" alt="National road-user share chart">
-          <p class="placeholder">Awaiting KNIME chart export</p>
-        </div>
-        <figcaption>Line chart · Year × share of hospitalizations (%)</figcaption>
-      </figure>
-    </article>
-    <article id="elective-2">
-      <h3>Age by road user</h3>
-      <p>In which age-by-road-user groups did hospitalised injury counts rise between 2011 and 2021? Did the increase among older adults occur among pedestrians, or among car drivers and pedal cyclists?</p>
-      <figure>
-        <div class="chart">
-          <img hidden data-src="assets/charts/elective-2.png" alt="Age by road user chart">
-          <p class="placeholder">Awaiting KNIME chart export</p>
-        </div>
-        <figcaption>Heatmap · Age group × road user · Change in count</figcaption>
-      </figure>
-    </article>
-    <article id="elective-3">
-      <h3>Hospitalizations and bed days</h3>
-      <p>Within the comparable window 2016–2021, do the road users and age groups that contribute the most hospitalisations also contribute the most bed days?</p>
-      <figure>
-        <div class="chart">
-          <img hidden data-src="assets/charts/elective-3.png" alt="Hospitalizations and bed days chart">
-          <p class="placeholder">Awaiting KNIME chart export</p>
-        </div>
-        <figcaption>Paired rankings · Hospitalizations and bed days, 2016–2021</figcaption>
-      </figure>
-    </article>
-    <article id="elective-4">
-      <h3>Jurisdiction trends</h3>
-      <p>Inside each jurisdiction’s comparable period — Victoria from 2012, New South Wales from 2017, and the other jurisdictions across 2011–2021 — did road-user composition move in the same direction?</p>
-      <figure>
-        <div class="chart">
-          <img hidden data-src="assets/charts/elective-4.png" alt="Jurisdiction trends chart">
-          <p class="placeholder">Awaiting KNIME chart export</p>
-        </div>
-        <figcaption>Small multiples · Year × road-user share within each jurisdiction</figcaption>
-      </figure>
-    </article>
-    <article id="elective-5">
-      <h3>First Nations patterns</h3>
-      <p>Did the rise in First Nations hospitalised injury counts follow the national shift toward pedal cyclists, or a different road-user and remoteness pattern? Which comparisons remain valid once status-not-stated and suppressed cells are taken into account?</p>
-      <figure>
-        <div class="chart">
-          <img hidden data-src="assets/charts/elective-5.png" alt="First Nations patterns chart">
-          <p class="placeholder">Awaiting KNIME chart export</p>
-        </div>
-        <figcaption>Trend and remoteness views · Flag suppressed and status-not-stated values</figcaption>
-      </figure>
-    </article>
-  </div>
-</section>
-</main>
-<footer class="wrap"><p><a href="https://github.com/ahmedsakib1113/DV03_T21/blob/main/PROJECT_PLAN.md">DV03_T21 project plan</a></p></footer>
+  <a class="skip-link" href="#main">Skip to research questions</a>
+  <header class="page-heading"><div class="wrap"><div class="header-meta"><span class="brand">ROAD<span>INSIGHT</span></span><span>COS30045 · GROUP DV03_T21</span></div><p class="eyebrow">HOSPITALISED ROAD TRAFFIC INJURIES / AUSTRALIA</p><h1>What do Australia’s road<br> injury numbers tell us?</h1><p class="header-description">Five questions. A decade of data. Explore the people, places and patterns behind hospitalisations from 2011 to 2021.</p><a class="hero-link" href="#q1">Explore the research <span aria-hidden="true">↓</span></a><p class="header-credit">BITRE data <span>·</span> Analysis and explanations by Yibo</p></div></header>
+  <nav class="question-nav" aria-label="Research questions"><div class="wrap nav-inner"><a href="#q1"><span>Q1</span> National trend</a><a href="#q2"><span>Q2</span> States &amp; territories</a><a href="#q3"><span>Q3</span> Age groups</a><a href="#q4"><span>Q4</span> Sex comparison</a><a href="#q5"><span>Q5</span> Road users</a></div></nav>
+  <main class="wrap" id="main">
+    <div class="snapshot" aria-label="Key figures"><div><span class="metric-label">2011 → 2021</span><strong>+16.1<span>%</span></strong><p>Growth in hospitalisations</p></div><div><span class="metric-label">2021 / NATIONAL COUNT</span><strong>39,505</strong><p>Hospitalised road traffic injuries</p></div><div><span class="metric-label">2011–2021 / ANNUAL AVERAGE</span><strong id="annual-average">37,353.1</strong><p>Hospitalisations per year</p></div></div>
+    <div class="interaction-guide"><span class="guide-icon" aria-hidden="true">↗</span><p><strong>Explore the charts.</strong> Click or tap a bar, map region, point or heatmap cell to turn it orange and reveal its value. Dashed lines show averages. Keyboard users can Tab to a mark and press Enter or Space.</p></div>
+    <noscript><p class="notice">Enable JavaScript to explore the interactive charts. Yibo’s explanations and the original source workbooks remain available below.</p></noscript>
+    <section class="question-section" id="q1" aria-labelledby="heading-q1">
+      <div class="question-heading"><p class="eyebrow">QUESTION 01 / NATIONAL TREND</p><h2 id="heading-q1">How did hospitalized road traffic injuries in Australia change between 2011 and 2021?</h2><p class="question-intro">Explore each year from 2011 to 2021. Select a bar to compare its count with the annual average.</p></div>
+      <div class="question-layout ">
+        <div class="chart-frame">
+      <div class="chart-toolbar"><p class="chart-instruction"><span class="selection-dot"></span> Click or tap to highlight <span class="average-key">– – Average</span></p><button type="button" class="reset-chart" data-reset="q1">Reset selection</button></div>
+      <div class="chart-host" id="chart-q1" data-chart="q1" aria-label="Annual hospitalisations · Australia · 2011–2021"><p class="loading-message">Loading interactive chart…</p></div>
+      <div class="chart-readout" id="readout-q1" aria-live="polite" aria-atomic="true">Select a mark to explore its value.</div>
+      <p class="chart-caption">Annual hospitalisations · Australia · 2011–2021 · Source: Yibo / BITRE</p>
+      <details class="data-disclosure"><summary>View values and download data</summary><div class="data-table-wrap" id="table-q1"></div><button type="button" class="download-data" data-download="q1">Download CSV ↓</button></details>
+    </div>
+        <aside class="explanation-panel"><p class="eyebrow">YIBO’S EXPLANATION</p><div class="chart-explanation" data-explanation-source="Yibo data/Q1/explanation.txt"><p>This chart has been correctly completed, and Q1 can be answered:</p><p>2011: 34,033</p><p>2019 reached the highest: 39,866</p><p>2020 dropped to: 37,966</p><p>2021 rebounded to: 39,505</p><p>Overall growth from 2011 to 2021 is approximately 16.1%</p><p>Conclusion: This indicates that the long-term trend is generally upward, but there was a significant interruption in 2020.</p></div></aside>
+      </div>
+    </section><section class="question-section" id="q2" aria-labelledby="heading-q2">
+      <div class="question-heading"><p class="eyebrow">QUESTION 02 / STATES &amp; TERRITORIES</p><h2 id="heading-q2">How do hospitalized road traffic injuries vary across Australian states and territories?</h2><p class="question-intro">Explore the eight states and territories in 2021. Select a region on the map to compare its count with the jurisdiction average.</p></div>
+      <div class="question-layout map-layout">
+        <div class="chart-frame">
+      <div class="chart-toolbar"><p class="chart-instruction"><span class="selection-dot"></span> Click or tap to highlight <span class="average-key">– – Average</span></p><button type="button" class="reset-chart" data-reset="q2">Reset selection</button></div>
+      <div class="chart-host" id="chart-q2" data-chart="q2" aria-label="Hospitalisations by state and territory · 2021"><p class="loading-message">Loading interactive chart…</p></div>
+      <div class="chart-readout" id="readout-q2" aria-live="polite" aria-atomic="true">Select a mark to explore its value.</div>
+      <p class="chart-caption">Hospitalisations by state and territory · 2021 · Source: Yibo / BITRE</p>
+      <details class="data-disclosure"><summary>View values and download data</summary><div class="data-table-wrap" id="table-q2"></div><button type="button" class="download-data" data-download="q2">Download CSV ↓</button></details>
+    </div>
+        <aside class="explanation-panel"><p class="eyebrow">YIBO’S EXPLANATION</p><div class="chart-explanation" data-explanation-source="Yibo data/Q2/explanation.txt"><p>In 2021, Victoria recorded the highest number of hospitalised road traffic injuries (11,130), followed by Queensland (10,447) and New South Wales (9,003). Together, these three jurisdictions accounted for approximately 77.4% of the national count. The territories recorded substantially lower counts, with the Northern Territory reporting 710 and the Australian Capital Territory 740. These figures are absolute counts rather than population-standardised rates. Therefore, lower counts in smaller jurisdictions do not necessarily indicate lower individual risk.</p></div></aside>
+      </div>
+    </section><section class="question-section" id="q3" aria-labelledby="heading-q3">
+      <div class="question-heading"><p class="eyebrow">QUESTION 03 / AGE GROUPS</p><h2 id="heading-q3">Which age groups account for the highest numbers of hospitalized road traffic injuries?</h2><p class="question-intro">Compare the seven reported age groups in 2021. Select a bar to see its count and distance from the group average.</p></div>
+      <div class="question-layout ">
+        <div class="chart-frame">
+      <div class="chart-toolbar"><p class="chart-instruction"><span class="selection-dot"></span> Click or tap to highlight <span class="average-key">– – Average</span></p><button type="button" class="reset-chart" data-reset="q3">Reset selection</button></div>
+      <div class="chart-host" id="chart-q3" data-chart="q3" aria-label="Hospitalisations by age group · 2021"><p class="loading-message">Loading interactive chart…</p></div>
+      <div class="chart-readout" id="readout-q3" aria-live="polite" aria-atomic="true">Select a mark to explore its value.</div>
+      <p class="chart-caption">Hospitalisations by age group · 2021 · Source: Yibo / BITRE</p>
+      <details class="data-disclosure"><summary>View values and download data</summary><div class="data-table-wrap" id="table-q3"></div><button type="button" class="download-data" data-download="q3">Download CSV ↓</button></details>
+    </div>
+        <aside class="explanation-panel"><p class="eyebrow">YIBO’S EXPLANATION</p><div class="chart-explanation" data-explanation-source="Yibo data/Q3/explanation.txt"><p>In 2021, people aged 40–64 recorded the largest number of hospitalised road traffic injuries (13,026), followed by those aged 26–39 (9,423) and 17–25 (8,010). Together, these three groups accounted for approximately 77.1% of all hospitalisations. The age bands have unequal widths; for example, 40–64 covers 25 years while 65–74 covers 10 years. These absolute counts therefore do not show an individual’s age-specific risk.</p></div></aside>
+      </div>
+    </section><section class="question-section" id="q4" aria-labelledby="heading-q4">
+      <div class="question-heading"><p class="eyebrow">QUESTION 04 / SEX COMPARISON</p><h2 id="heading-q4">How do hospitalized road traffic injuries differ between males and females?</h2><p class="question-intro">Compare male and female hospitalisations from 2011 to 2021. Select a bar to compare it with that series’ annual average.</p></div>
+      <div class="question-layout ">
+        <div class="chart-frame">
+      <div class="chart-toolbar"><p class="chart-instruction"><span class="selection-dot"></span> Click or tap to highlight <span class="average-key">– – Average</span></p><button type="button" class="reset-chart" data-reset="q4">Reset selection</button></div>
+      <div class="chart-host" id="chart-q4" data-chart="q4" aria-label="Annual hospitalisations by sex · 2011–2021"><p class="loading-message">Loading interactive chart…</p></div>
+      <div class="chart-readout" id="readout-q4" aria-live="polite" aria-atomic="true">Select a mark to explore its value.</div>
+      <p class="chart-caption">Annual hospitalisations by sex · 2011–2021 · Source: Yibo / BITRE</p>
+      <details class="data-disclosure"><summary>View values and download data</summary><div class="data-table-wrap" id="table-q4"></div><button type="button" class="download-data" data-download="q4">Download CSV ↓</button></details>
+    </div>
+        <aside class="explanation-panel"><p class="eyebrow">YIBO’S EXPLANATION</p><div class="chart-explanation" data-explanation-source="Yibo data/Q4/explanation.txt"><p>Male hospitalisations remained substantially higher than female hospitalisations throughout 2011–2021. Male cases increased from 22,321 in 2011 to 25,788 in 2021, while female cases increased from 11,712 to 13,716. Males consistently accounted for approximately two-thirds of hospitalisations. The 2020 decline was much larger among females: female hospitalisations fell from 14,499 in 2019 to 12,781 in 2020, while the male count declined only slightly from 25,365 to 25,178. These are counts, not sex-specific population rates or exposure-adjusted risks.</p></div></aside>
+      </div>
+    </section><section class="question-section" id="q5" aria-labelledby="heading-q5">
+      <div class="question-heading"><p class="eyebrow">QUESTION 05 / ROAD USERS</p><h2 id="heading-q5">How do injury numbers differ among road user groups, such as vehicle occupants, motorcyclists, cyclists, and pedestrians?</h2><p class="question-intro">Compare five road-user groups in 2021. Select a bar to compare its count with the road-user group average.</p></div>
+      <div class="question-layout ">
+        <div class="chart-frame">
+      <div class="chart-toolbar"><p class="chart-instruction"><span class="selection-dot"></span> Click or tap to highlight <span class="average-key">– – Average</span></p><button type="button" class="reset-chart" data-reset="q5">Reset selection</button></div>
+      <div class="chart-host" id="chart-q5" data-chart="q5" aria-label="Hospitalisations by road-user group · 2021"><p class="loading-message">Loading interactive chart…</p></div>
+      <div class="chart-readout" id="readout-q5" aria-live="polite" aria-atomic="true">Select a mark to explore its value.</div>
+      <p class="chart-caption">Hospitalisations by road-user group · 2021 · Source: Yibo / BITRE</p>
+      <details class="data-disclosure"><summary>View values and download data</summary><div class="data-table-wrap" id="table-q5"></div><button type="button" class="download-data" data-download="q5">Download CSV ↓</button></details>
+    </div>
+        <aside class="explanation-panel"><p class="eyebrow">YIBO’S EXPLANATION</p><div class="chart-explanation" data-explanation-source="Yibo data/Q5/explanation.txt"><p>Vehicle occupants recorded the largest number of hospitalisations in 2021 (19,524), representing approximately 49.4% of the national total. Motorcyclists accounted for 8,883 cases (22.5%) and cyclists for 8,163 (20.7%). Pedestrians recorded 2,334 cases (5.9%). These counts do not account for differences in travel frequency, distance travelled, or population exposure. They therefore describe the composition of hospitalisations, not the risk per trip or kilometre.</p></div></aside>
+      </div>
+    </section>
+    <article class="question-section" id="e2" aria-labelledby="heading-e2"><div class="question-heading"><p class="eyebrow">E2 / FURTHER ANALYSIS</p><h3 id="heading-e2">How did hospitalisations change by age and road user between 2011 and 2021?</h3></div><div class="question-layout"><div class="chart-frame">
+      <div class="chart-toolbar"><p class="chart-instruction"><span class="selection-dot"></span> Click or tap to highlight <span class="average-key">– – Average</span></p><button type="button" class="reset-chart" data-reset="e2">Reset selection</button></div>
+      <div class="chart-host" id="chart-e2" data-chart="e2" aria-label="Change in hospitalisations · 2021 minus 2011"><p class="loading-message">Loading interactive chart…</p></div>
+      <div class="chart-readout" id="readout-e2" aria-live="polite" aria-atomic="true">Select a mark to explore its value.</div>
+      <p class="chart-caption">Change in hospitalisations · 2021 minus 2011 · Source: Yibo / BITRE</p>
+      <details class="data-disclosure"><summary>View values and download data</summary><div class="data-table-wrap" id="table-e2"></div><button type="button" class="download-data" data-download="e2">Download CSV ↓</button></details>
+    </div><aside class="explanation-panel"><p class="eyebrow">YIBO’S EXPLANATION</p><div class="chart-explanation" data-explanation-source="Yibo data/E2/explanation.txt"><p>Between 2011 and 2021, growth among older adults was concentrated among car drivers and pedal cyclists rather than pedestrians. Among people aged 40–64, cyclist hospitalisations increased by 1,376 and car-driver hospitalisations by 564, whereas pedestrian hospitalisations decreased by 11. Cyclist increases were also evident among ages 65–74 (+509) and 75+ (+198). In contrast, pedestrian changes among older groups were small or negative: +8 for ages 65–74 and −77 for ages 75+. The findings indicate that the increase among older adults was primarily associated with cycling and driving, rather than pedestrian injuries. The largest decline occurred among pedestrians aged 17–25 (−194), while car-driver hospitalisations increased most among ages 26–39 (+781). These are changes in absolute counts. Population ageing and changes in travel exposure are not controlled for, so the results do not demonstrate changes in individual risk.</p></div></aside></div></article>
+
+    <details class="supplementary" id="further-analysis"><summary>What else does Yibo’s analysis reveal? <span>E1 &amp; E3 · Explore further ↓</span></summary><div class="supplementary-content"><article class="question-section supplementary-question" id="e1" aria-labelledby="heading-e1"><div class="question-heading"><p class="eyebrow">E1 / FURTHER ANALYSIS</p><h3 id="heading-e1">How did the share of hospitalisations change across road-user groups?</h3></div><div class="question-layout"><div class="chart-frame">
+      <div class="chart-toolbar"><p class="chart-instruction"><span class="selection-dot"></span> Click or tap to highlight <span class="average-key">– – Average</span></p><button type="button" class="reset-chart" data-reset="e1">Reset selection</button></div>
+      <div class="chart-host" id="chart-e1" data-chart="e1" aria-label="Road-user share of national hospitalisations (%) · 2011–2021"><p class="loading-message">Loading interactive chart…</p></div>
+      <div class="chart-readout" id="readout-e1" aria-live="polite" aria-atomic="true">Select a mark to explore its value.</div>
+      <p class="chart-caption">Road-user share of national hospitalisations (%) · 2011–2021 · Source: Yibo / BITRE</p>
+      <details class="data-disclosure"><summary>View values and download data</summary><div class="data-table-wrap" id="table-e1"></div><button type="button" class="download-data" data-download="e1">Download CSV ↓</button></details>
+    </div><aside class="explanation-panel"><p class="eyebrow">YIBO’S EXPLANATION</p><div class="chart-explanation" data-explanation-source="Yibo data/E1/explanation.txt"><p>The change was not uniform across road users. Cyclists increased from 15.8% of hospitalisations in 2011 to 21.9% in 2020. Although the share fell slightly to 20.7% in 2021, it remained above both 2019 (18.3%) and 2011. Vehicle occupants fell from approximately 52.0% to 49.4%, while motorcyclists remained relatively stable at around 22%–23%. The 2020 disruption therefore coincided with a lasting elevation in the cyclist share.</p></div></aside></div></article><article class="question-section supplementary-question" id="e3a" aria-labelledby="heading-e3a"><div class="question-heading"><p class="eyebrow">E3A / FURTHER ANALYSIS</p><h3 id="heading-e3a">Do road users with more hospitalisations also account for more bed days?</h3></div><div class="question-layout"><div class="chart-frame">
+      <div class="chart-toolbar"><p class="chart-instruction"><span class="selection-dot"></span> Click or tap to highlight <span class="average-key">– – Average</span></p><button type="button" class="reset-chart" data-reset="e3a">Reset selection</button></div>
+      <div class="chart-host" id="chart-e3a" data-chart="e3a" aria-label="Shares of hospitalisations and bed days (%) · 2016–2021"><p class="loading-message">Loading interactive chart…</p></div>
+      <div class="chart-readout" id="readout-e3a" aria-live="polite" aria-atomic="true">Select a mark to explore its value.</div>
+      <p class="chart-caption">Shares of hospitalisations and bed days (%) · 2016–2021 · Source: Yibo / BITRE</p>
+      <details class="data-disclosure"><summary>View values and download data</summary><div class="data-table-wrap" id="table-e3a"></div><button type="button" class="download-data" data-download="e3a">Download CSV ↓</button></details>
+    </div><aside class="explanation-panel"><p class="eyebrow">YIBO’S EXPLANATION</p><div class="chart-explanation" data-explanation-source="Yibo data/E3/E3a/explanation.txt"><p>The groups contributing the most hospitalisations did not always contribute the same share of bed days. Cyclists accounted for 19.02% of hospitalisations but only 11.13% of bed days. In contrast, pedestrians accounted for only 6.49% of hospitalisations but 13.14% of bed days. Motorcyclists also had a higher bed-day share (25.02%) than hospitalisation share (22.27%). Road-user results showed a similar mismatch. Pedestrians accounted for 6.49% of hospitalisations but 13.14% of bed days, whereas cyclists accounted for 19.02% of hospitalisations but only 11.13% of bed days. Therefore, groups with the most hospitalisations were not necessarily those generating the greatest hospital burden.</p></div></aside></div></article><article class="question-section supplementary-question" id="e3b" aria-labelledby="heading-e3b"><div class="question-heading"><p class="eyebrow">E3B / FURTHER ANALYSIS</p><h3 id="heading-e3b">Do age groups with more hospitalisations also account for more bed days?</h3></div><div class="question-layout"><div class="chart-frame">
+      <div class="chart-toolbar"><p class="chart-instruction"><span class="selection-dot"></span> Click or tap to highlight <span class="average-key">– – Average</span></p><button type="button" class="reset-chart" data-reset="e3b">Reset selection</button></div>
+      <div class="chart-host" id="chart-e3b" data-chart="e3b" aria-label="Shares of hospitalisations and bed days (%) · 2016–2021"><p class="loading-message">Loading interactive chart…</p></div>
+      <div class="chart-readout" id="readout-e3b" aria-live="polite" aria-atomic="true">Select a mark to explore its value.</div>
+      <p class="chart-caption">Shares of hospitalisations and bed days (%) · 2016–2021 · Source: Yibo / BITRE</p>
+      <details class="data-disclosure"><summary>View values and download data</summary><div class="data-table-wrap" id="table-e3b"></div><button type="button" class="download-data" data-download="e3b">Download CSV ↓</button></details>
+    </div><aside class="explanation-panel"><p class="eyebrow">YIBO’S EXPLANATION</p><div class="chart-explanation" data-explanation-source="Yibo data/E3/E3b/explanation.txt"><p>From 2016 to 2021, people aged 40–64 accounted for the largest shares of both hospitalisations (32.82%) and bed days (34.17%). However, older age groups showed a disproportionate bed-day burden. People aged 75 and over represented only 6.23% of hospitalisations but 13.29% of bed days, while those aged 65–74 accounted for 7.31% of hospitalisations but 11.18% of bed days. In contrast, people aged 8–16 represented 6.61% of hospitalisations but only 3.53% of bed days. These results suggest that hospitalisations among older adults tend to consume more hospital resources relative to their case numbers. Bed days indicate healthcare resource use, but they should not be interpreted as a complete measure of injury severity because length of stay may also be affected by treatment needs, comorbidities, discharge arrangements, and other factors.</p></div></aside></div></article></div></details>
+    <section class="sources-section" id="sources" aria-labelledby="sources-title"><div><p class="eyebrow">SOURCE & CONTEXT</p><h2 id="sources-title">What should you know<br> about these numbers?</h2><p>These visualisations follow the five research questions in the project plan and Yibo’s supplied BITRE analysis. Yibo’s explanations are reproduced unchanged.</p><a class="text-link" href="Yibo%20data/Preliminary%20Investigation%20and%20Sorting%20of%20Projects.pdf" target="_blank" rel="noopener">Read the preliminary investigation ↗</a></div><div>
+      <details open><summary>How are averages calculated?</summary><p>Averages are arithmetic means of the displayed values: Q1 across 11 years; Q2 across eight jurisdictions; Q3 across seven known age groups; Q4 across 11 years separately for each sex; Q5 across five road-user groups, including “Other or unknown”. Supplemental percentage charts use a separate mean for each displayed series. E2 averages the 28 displayed changes. Values are rounded for display; calculations use full precision.</p></details>
+      <details><summary>How should comparisons be interpreted?</summary><p>These are counts and shares, rather than population-standardised or exposure-adjusted risks. Age bands have unequal widths. The Q2 map shows 2021 counts; larger or darker regions do not indicate greater individual risk. The eight jurisdiction counts total 39,035; the national total is 39,505 because it also includes unrecorded or migratory/offshore residence. The supplied male and female counts sum to one fewer case than the 2021 national total. Bed days measure hospital resource use rather than injury severity alone.</p><p>The source notes a series break for Victoria from 2012 and New South Wales from June 2017. These changes should be considered when interpreting national trends.</p></details>
+      <details><summary>Where do the data and map come from?</summary><ul class="source-links"><li><a href="Yibo%20data/Dataset/hospitalisation_injury_publication_sep2023.xlsx" download>National hospitalisation workbook <span>XLSX ↓</span></a></li><li><a href="Yibo%20data/Dataset/state-and-territory-hospitalisation-injury-publication-2023.xlsx" download>State & territory workbook <span>XLSX ↓</span></a></li><li><a href="data/chart-data.json" download>Chart values and source table references <span>JSON ↓</span></a></li><li><a href="https://github.com/rowanhogan/australian-states" target="_blank" rel="noopener">Australian state boundaries · Rowan Hogan ↗</a></li></ul><p>Chart values are extracted from the supplied workbooks. “Vehicle occupants” combines car, heavy-transport, pick-up/van and bus occupants. Map geometry is used only to draw boundaries; hospitalisation values come from Yibo’s supplied BITRE workbook.</p></details>
+    </div></section>
+  </main>
+  <footer class="site-footer"><div class="wrap footer-inner"><div><span class="brand">ROAD<span>INSIGHT</span></span><p>Understanding the numbers. Seeing the people.</p></div><p>COS30045 · Data Visualisation<br>Group DV03_T21 · Analysis by Yibo</p><a href="#" class="back-top">Back to top ↑</a></div></footer>
 </body>
 </html>

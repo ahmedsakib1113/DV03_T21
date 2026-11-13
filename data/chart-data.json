@@ -1,0 +1,550 @@
+{
+  "q1": [
+    {
+      "label": "2011",
+      "value": 34033
+    },
+    {
+      "label": "2012",
+      "value": 34024
+    },
+    {
+      "label": "2013",
+      "value": 35001
+    },
+    {
+      "label": "2014",
+      "value": 35515
+    },
+    {
+      "label": "2015",
+      "value": 37082
+    },
+    {
+      "label": "2016",
+      "value": 38963
+    },
+    {
+      "label": "2017",
+      "value": 39339
+    },
+    {
+      "label": "2018",
+      "value": 39590
+    },
+    {
+      "label": "2019",
+      "value": 39866
+    },
+    {
+      "label": "2020",
+      "value": 37966
+    },
+    {
+      "label": "2021",
+      "value": 39505
+    }
+  ],
+  "q2": [
+    {
+      "label": "New South Wales",
+      "code": "NSW",
+      "value": 9003
+    },
+    {
+      "label": "Victoria",
+      "code": "VIC",
+      "value": 11130
+    },
+    {
+      "label": "Queensland",
+      "code": "QLD",
+      "value": 10447
+    },
+    {
+      "label": "South Australia",
+      "code": "SA",
+      "value": 2632
+    },
+    {
+      "label": "Western Australia",
+      "code": "WA",
+      "value": 3568
+    },
+    {
+      "label": "Tasmania",
+      "code": "TAS",
+      "value": 805
+    },
+    {
+      "label": "Northern Territory",
+      "code": "NT",
+      "value": 710
+    },
+    {
+      "label": "Australian Capital Territory",
+      "code": "ACT",
+      "value": 740
+    }
+  ],
+  "q3": [
+    {
+      "label": "0-7",
+      "value": 707
+    },
+    {
+      "label": "8-16",
+      "value": 2863
+    },
+    {
+      "label": "17-25",
+      "value": 8010
+    },
+    {
+      "label": "26-39",
+      "value": 9423
+    },
+    {
+      "label": "40-64",
+      "value": 13026
+    },
+    {
+      "label": "65-74",
+      "value": 3018
+    },
+    {
+      "label": "75+",
+      "value": 2458
+    }
+  ],
+  "q4": [
+    {
+      "label": "2011",
+      "Male": 22321,
+      "Female": 11712
+    },
+    {
+      "label": "2012",
+      "Male": 22431,
+      "Female": 11593
+    },
+    {
+      "label": "2013",
+      "Male": 22957,
+      "Female": 12042
+    },
+    {
+      "label": "2014",
+      "Male": 23221,
+      "Female": 12294
+    },
+    {
+      "label": "2015",
+      "Male": 23920,
+      "Female": 13161
+    },
+    {
+      "label": "2016",
+      "Male": 25011,
+      "Female": 13952
+    },
+    {
+      "label": "2017",
+      "Male": 25256,
+      "Female": 14083
+    },
+    {
+      "label": "2018",
+      "Male": 25315,
+      "Female": 14273
+    },
+    {
+      "label": "2019",
+      "Male": 25365,
+      "Female": 14499
+    },
+    {
+      "label": "2020",
+      "Male": 25178,
+      "Female": 12781
+    },
+    {
+      "label": "2021",
+      "Male": 25788,
+      "Female": 13716
+    }
+  ],
+  "q5": [
+    {
+      "label": "Vehicle occupants",
+      "value": 19524
+    },
+    {
+      "label": "Motorcyclists",
+      "value": 8883
+    },
+    {
+      "label": "Cyclists",
+      "value": 8163
+    },
+    {
+      "label": "Pedestrians",
+      "value": 2334
+    },
+    {
+      "label": "Other or unknown",
+      "value": 601
+    }
+  ],
+  "e1": [
+    {
+      "label": "2011",
+      "Vehicle occupants": 52.04654306114654,
+      "Motorcyclists": 22.228425351864367,
+      "Cyclists": 15.840507742485235,
+      "Pedestrians": 8.092145858431522,
+      "Other or unknown": 1.7923779860723417
+    },
+    {
+      "label": "2012",
+      "Vehicle occupants": 51.257935574888315,
+      "Motorcyclists": 22.713378791441336,
+      "Cyclists": 16.52069127674583,
+      "Pedestrians": 7.853280037620502,
+      "Other or unknown": 1.6547143193040206
+    },
+    {
+      "label": "2013",
+      "Vehicle occupants": 50.078569183737606,
+      "Motorcyclists": 22.907916916659524,
+      "Cyclists": 17.890917402359932,
+      "Pedestrians": 7.591211679666294,
+      "Other or unknown": 1.5313848175766407
+    },
+    {
+      "label": "2014",
+      "Vehicle occupants": 49.22708714627622,
+      "Motorcyclists": 23.466141067154723,
+      "Cyclists": 18.685062649584683,
+      "Pedestrians": 7.191327608052936,
+      "Other or unknown": 1.4303815289314374
+    },
+    {
+      "label": "2015",
+      "Vehicle occupants": 51.07060029124643,
+      "Motorcyclists": 22.37743379537242,
+      "Cyclists": 18.111212987433255,
+      "Pedestrians": 7.084299660212502,
+      "Other or unknown": 1.3564532657353972
+    },
+    {
+      "label": "2016",
+      "Vehicle occupants": 51.76706105792675,
+      "Motorcyclists": 21.882298590970922,
+      "Cyclists": 17.719374791468827,
+      "Pedestrians": 7.040012319379925,
+      "Other or unknown": 1.5912532402535737
+    },
+    {
+      "label": "2017",
+      "Vehicle occupants": 51.37395459976105,
+      "Motorcyclists": 22.214596202242053,
+      "Cyclists": 17.98723912656651,
+      "Pedestrians": 6.899006075395918,
+      "Other or unknown": 1.5252039960344697
+    },
+    {
+      "label": "2018",
+      "Vehicle occupants": 52.397069967163425,
+      "Motorcyclists": 21.780752715332156,
+      "Cyclists": 17.577671129072996,
+      "Pedestrians": 6.72139429148775,
+      "Other or unknown": 1.5231118969436728
+    },
+    {
+      "label": "2019",
+      "Vehicle occupants": 50.93814277830732,
+      "Motorcyclists": 22.384989715547082,
+      "Cyclists": 18.316359805347915,
+      "Pedestrians": 6.805297747453971,
+      "Other or unknown": 1.5552099533437014
+    },
+    {
+      "label": "2020",
+      "Vehicle occupants": 48.10883422009166,
+      "Motorcyclists": 22.87309698150977,
+      "Cyclists": 21.945951640941896,
+      "Pedestrians": 5.539166622767739,
+      "Other or unknown": 1.532950534688932
+    },
+    {
+      "label": "2021",
+      "Vehicle occupants": 49.42159220351854,
+      "Motorcyclists": 22.485761296038476,
+      "Cyclists": 20.663207188963423,
+      "Pedestrians": 5.908112897101633,
+      "Other or unknown": 1.5213264143779268
+    }
+  ],
+  "e2": [
+    {
+      "age": "0-7",
+      "road": "Car driver",
+      "label": "0-7 / Car driver",
+      "value": 9
+    },
+    {
+      "age": "0-7",
+      "road": "Motorcyclist",
+      "label": "0-7 / Motorcyclist",
+      "value": 9
+    },
+    {
+      "age": "0-7",
+      "road": "Pedal cyclist",
+      "label": "0-7 / Pedal cyclist",
+      "value": 13
+    },
+    {
+      "age": "0-7",
+      "road": "Pedestrian",
+      "label": "0-7 / Pedestrian",
+      "value": -40
+    },
+    {
+      "age": "8-16",
+      "road": "Car driver",
+      "label": "8-16 / Car driver",
+      "value": -7
+    },
+    {
+      "age": "8-16",
+      "road": "Motorcyclist",
+      "label": "8-16 / Motorcyclist",
+      "value": 101
+    },
+    {
+      "age": "8-16",
+      "road": "Pedal cyclist",
+      "label": "8-16 / Pedal cyclist",
+      "value": 389
+    },
+    {
+      "age": "8-16",
+      "road": "Pedestrian",
+      "label": "8-16 / Pedestrian",
+      "value": -90
+    },
+    {
+      "age": "17-25",
+      "road": "Car driver",
+      "label": "17-25 / Car driver",
+      "value": 355
+    },
+    {
+      "age": "17-25",
+      "road": "Motorcyclist",
+      "label": "17-25 / Motorcyclist",
+      "value": -22
+    },
+    {
+      "age": "17-25",
+      "road": "Pedal cyclist",
+      "label": "17-25 / Pedal cyclist",
+      "value": 59
+    },
+    {
+      "age": "17-25",
+      "road": "Pedestrian",
+      "label": "17-25 / Pedestrian",
+      "value": -194
+    },
+    {
+      "age": "26-39",
+      "road": "Car driver",
+      "label": "26-39 / Car driver",
+      "value": 781
+    },
+    {
+      "age": "26-39",
+      "road": "Motorcyclist",
+      "label": "26-39 / Motorcyclist",
+      "value": 305
+    },
+    {
+      "age": "26-39",
+      "road": "Pedal cyclist",
+      "label": "26-39 / Pedal cyclist",
+      "value": 228
+    },
+    {
+      "age": "26-39",
+      "road": "Pedestrian",
+      "label": "26-39 / Pedestrian",
+      "value": -16
+    },
+    {
+      "age": "40-64",
+      "road": "Car driver",
+      "label": "40-64 / Car driver",
+      "value": 564
+    },
+    {
+      "age": "40-64",
+      "road": "Motorcyclist",
+      "label": "40-64 / Motorcyclist",
+      "value": 614
+    },
+    {
+      "age": "40-64",
+      "road": "Pedal cyclist",
+      "label": "40-64 / Pedal cyclist",
+      "value": 1376
+    },
+    {
+      "age": "40-64",
+      "road": "Pedestrian",
+      "label": "40-64 / Pedestrian",
+      "value": -11
+    },
+    {
+      "age": "65-74",
+      "road": "Car driver",
+      "label": "65-74 / Car driver",
+      "value": 306
+    },
+    {
+      "age": "65-74",
+      "road": "Motorcyclist",
+      "label": "65-74 / Motorcyclist",
+      "value": 241
+    },
+    {
+      "age": "65-74",
+      "road": "Pedal cyclist",
+      "label": "65-74 / Pedal cyclist",
+      "value": 509
+    },
+    {
+      "age": "65-74",
+      "road": "Pedestrian",
+      "label": "65-74 / Pedestrian",
+      "value": 8
+    },
+    {
+      "age": "75+",
+      "road": "Car driver",
+      "label": "75+ / Car driver",
+      "value": 371
+    },
+    {
+      "age": "75+",
+      "road": "Motorcyclist",
+      "label": "75+ / Motorcyclist",
+      "value": 70
+    },
+    {
+      "age": "75+",
+      "road": "Pedal cyclist",
+      "label": "75+ / Pedal cyclist",
+      "value": 198
+    },
+    {
+      "age": "75+",
+      "road": "Pedestrian",
+      "label": "75+ / Pedestrian",
+      "value": -77
+    }
+  ],
+  "e3a": [
+    {
+      "label": "Vehicle occupants",
+      "Hospitalisations": 50.68252638917821,
+      "Bed days": 48.65792362635273
+    },
+    {
+      "label": "Motorcyclists",
+      "Hospitalisations": 22.267237457966495,
+      "Bed days": 25.02437086757053
+    },
+    {
+      "label": "Cyclists",
+      "Hospitalisations": 19.01806324900416,
+      "Bed days": 11.127272962615695
+    },
+    {
+      "label": "Pedestrians",
+      "Hospitalisations": 6.490696300201081,
+      "Bed days": 13.136160542736185
+    },
+    {
+      "label": "Other or unknown",
+      "Hospitalisations": 1.54147660365006,
+      "Bed days": 2.0542720007248563
+    }
+  ],
+  "e3b": [
+    {
+      "label": "0-7",
+      "Hospitalisations": 1.8386338419157502,
+      "Bed days": 1.0858283303953462
+    },
+    {
+      "label": "8-16",
+      "Hospitalisations": 6.611854830824431,
+      "Bed days": 3.5313285985760134
+    },
+    {
+      "label": "17-25",
+      "Hospitalisations": 20.972754209727544,
+      "Bed days": 16.809952536471357
+    },
+    {
+      "label": "26-39",
+      "Hospitalisations": 24.21512653626891,
+      "Bed days": 19.935733718844727
+    },
+    {
+      "label": "40-64",
+      "Hospitalisations": 32.81780732817807,
+      "Bed days": 34.1694529680683
+    },
+    {
+      "label": "65-74",
+      "Hospitalisations": 7.309898014275451,
+      "Bed days": 11.17605514732948
+    },
+    {
+      "label": "75+",
+      "Hospitalisations": 6.2339252388098405,
+      "Bed days": 13.291648700314779
+    }
+  ],
+  "sources": {
+    "national": "Yibo data/Dataset/hospitalisation_injury_publication_sep2023.xlsx",
+    "states": "Yibo data/Dataset/state-and-territory-hospitalisation-injury-publication-2023.xlsx",
+    "csv": {
+      "q1": "Yibo data/Q1/Q1_national_annual_hospitalisations_2011_2021.csv",
+      "q2": "Yibo data/Q2/Q2_state_territory_hospitalisations_2021.csv",
+      "q3": "Yibo data/Q3/Q3_age_group_hospitalisations_2021.csv",
+      "q4": "Yibo data/Q4/Q4_male_female_hospitalisations_2011_2021.csv",
+      "q5": "Yibo data/Q5/Q5_road_user_group_hospitalisations_2021.csv",
+      "e1": "Yibo data/E1/E1_road_user_annual_shares_2011_2021.csv",
+      "e2": "Yibo data/E2/E2_age_road_user_change_2011_2021.csv",
+      "e3a": "Yibo data/E3/E3a/E3a_road_user_hospitalisation_bed_day_shares.csv",
+      "e3b": "Yibo data/E3/E3b/E3b_age_hospitalisation_bed_day_shares.csv"
+    },
+    "methods": {
+      "q1": "Annual hospitalisations from the Q1 CSV.",
+      "q2": "2021 jurisdiction counts from the Q2 CSV; state codes mapped to map names.",
+      "q3": "2021 counts from the Q3 CSV, in age order.",
+      "q4": "Annual male and female counts from the Q4 CSV.",
+      "q5": "2021 counts from the Q5 CSV, in the existing chart order.",
+      "e1": "Exported annual shares; Other or unknown share equals its exported count divided by Annual total times 100.",
+      "e2": "Exported Change 2011-2021, checked against each row's 2021 minus 2011 counts.",
+      "e3a": "Exported road-user hospitalisation and bed-day shares, checked against counts and totals.",
+      "e3b": "Exported age-group hospitalisation and bed-day shares, checked against counts and totals."
+    },
+    "map": "https://github.com/rowanhogan/australian-states/blob/master/states.geojson"
+  }
+}
