@@ -3,6 +3,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const { JSDOM } = require(process.argv[2] || "jsdom");
+const { assetVersion } = require("./version-assets.cjs");
 const root = path.resolve(__dirname, "..");
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const css = fs.readFileSync(path.join(root, "css/style.css"), "utf8");
@@ -14,6 +15,12 @@ const questions = fs.readFileSync(path.join(root, "PROJECT_PLAN.md"), "utf8").sp
 async function loadPage(width, missingMap = false, missingFilters = false) {
   const dom = new JSDOM(html, { runScripts: "outside-only", url: "http://localhost:8000/", pretendToBeVisual: true });
   const { window } = dom;
+  const version = window.document.documentElement.dataset.assetVersion;
+  assert.equal(version, assetVersion(), "Run node scripts/version-assets.cjs after changing site assets");
+  window.document.querySelectorAll('script[src], link[rel="stylesheet"]').forEach(element => {
+    const url = new URL(element.getAttribute("src") || element.getAttribute("href"), window.location.href);
+    assert.equal(url.searchParams.get("v"), version, "Styles and scripts must share the release version");
+  });
   const style = window.document.createElement("style");
   style.textContent = css;
   window.document.head.append(style);
@@ -23,9 +30,11 @@ async function loadPage(width, missingMap = false, missingFilters = false) {
   window.console.error = (...args) => errors.push(args.map(String).join(" "));
   window.addEventListener("error", event => errors.push(String(event.error)));
   window.fetch = async url => {
+    assert.equal(new URL(String(url), window.location.href).searchParams.get("v"), version,
+      "Chart data and map requests must use the same release version");
     if (missingMap && String(url).includes("geojson")) throw new Error("Map intentionally unavailable in test");
     if (missingFilters && String(url).includes("global-data")) throw new Error("Filters intentionally unavailable in test");
-    const file = path.join(root, String(url));
+    const file = path.join(root, String(url).split("?")[0]);
     return { ok: true, status: 200, json: async () => JSON.parse(fs.readFileSync(file, "utf8")) };
   };
   const observers = [];
@@ -40,7 +49,7 @@ async function loadPage(width, missingMap = false, missingFilters = false) {
   window.HTMLAnchorElement.prototype.click = function () { downloadName = this.download; };
   // Use the page's actual script order so file splits are checked too.
   window.document.querySelectorAll("script[src]").forEach(script => {
-    window.eval(fs.readFileSync(path.join(root, script.getAttribute("src")), "utf8"));
+    window.eval(fs.readFileSync(path.join(root, script.getAttribute("src").split("?")[0]), "utf8"));
   });
   for (let i = 0; i < 50 && window.document.documentElement.dataset.chartsReady !== "true"; i++) {
     await new Promise(resolve => setTimeout(resolve, 10));

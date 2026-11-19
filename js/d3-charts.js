@@ -10,6 +10,11 @@
   let datasets;
   let filterData;
 
+  function loadJSON(file) {
+    const version = document.documentElement.dataset.assetVersion;
+    return d3.json(file + (version ? "?v=" + encodeURIComponent(version) : ""));
+  }
+
   function format(value, percent = false) {
     if (value === null || value === undefined || !Number.isFinite(value)) return "Not available";
     return decimal.format(value) + (percent ? "%" : "");
@@ -620,7 +625,7 @@
       return false;
     }
     try {
-      datasets = await d3.json("data/chart-data.json");
+      datasets = await loadJSON("data/chart-data.json");
     } catch (error) {
       document.querySelectorAll(".chart-host").forEach(host => showError(host, "Chart values could not load. Open this page through VS Code Live Server, then refresh."));
       console.error("Unable to load chart values", error);
@@ -628,7 +633,7 @@
     }
     document.getElementById("annual-average").textContent = decimal.format(d3.mean(datasets.q1, row => row.value));
     try {
-      filterData = await d3.json("data/global-data.json");
+      filterData = await loadJSON("data/global-data.json");
       if (!window.RoadInsightFilters) throw new Error("Shared filter controls are unavailable");
     } catch (error) {
       filterData = null;
@@ -663,7 +668,7 @@
     // Map loading is independent: an unavailable boundary file cannot stop the other charts.
     try {
       const map = controllers.get("q2");
-      map.geo = await d3.json("data/australian-states.geojson");
+      map.geo = await loadJSON("data/australian-states.geojson");
       redraw(map);
     } catch (error) {
       showError(document.getElementById("chart-q2"), "The Australian map could not load. Refresh to try again; jurisdiction values remain in the table below.");
