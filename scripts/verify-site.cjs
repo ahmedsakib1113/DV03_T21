@@ -7,11 +7,11 @@ const root = path.resolve(__dirname, "..");
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const css = fs.readFileSync(path.join(root, "css/style.css"), "utf8");
 const data = JSON.parse(fs.readFileSync(path.join(root, "data/chart-data.json"), "utf8"));
-const originalExplanations = JSON.parse(fs.readFileSync(path.join(root, "data/yibo-explanations.json"), "utf8"));
+const globalData = JSON.parse(fs.readFileSync(path.join(root, "data/global-data.json"), "utf8"));
 const questions = fs.readFileSync(path.join(root, "PROJECT_PLAN.md"), "utf8").split(/\r?\n/)
   .filter(line => /^[1-5]\. (How|Which)/.test(line)).slice(-5).map(line => line.slice(3));
 
-async function loadPage(width, missingMap = false) {
+async function loadPage(width, missingMap = false, missingFilters = false) {
   const dom = new JSDOM(html, { runScripts: "outside-only", url: "http://localhost:8000/", pretendToBeVisual: true });
   const { window } = dom;
   const style = window.document.createElement("style");
@@ -24,6 +24,7 @@ async function loadPage(width, missingMap = false) {
   window.addEventListener("error", event => errors.push(String(event.error)));
   window.fetch = async url => {
     if (missingMap && String(url).includes("geojson")) throw new Error("Map intentionally unavailable in test");
+    if (missingFilters && String(url).includes("global-data")) throw new Error("Filters intentionally unavailable in test");
     const file = path.join(root, String(url));
     return { ok: true, status: 200, json: async () => JSON.parse(fs.readFileSync(file, "utf8")) };
   };
@@ -37,8 +38,10 @@ async function loadPage(width, missingMap = false) {
   window.URL.createObjectURL = blob => { downloaded = blob; return "blob:test-csv"; };
   window.URL.revokeObjectURL = () => {};
   window.HTMLAnchorElement.prototype.click = function () { downloadName = this.download; };
-  window.eval(fs.readFileSync(path.join(root, "assets/vendor/d3.v7.min.js"), "utf8"));
-  window.eval(fs.readFileSync(path.join(root, "js/main.js"), "utf8"));
+  // Use the page's actual script order so file splits are checked too.
+  window.document.querySelectorAll("script[src]").forEach(script => {
+    window.eval(fs.readFileSync(path.join(root, script.getAttribute("src")), "utf8"));
+  });
   for (let i = 0; i < 50 && window.document.documentElement.dataset.chartsReady !== "true"; i++) {
     await new Promise(resolve => setTimeout(resolve, 10));
   }
@@ -58,139 +61,210 @@ function click(window, mark) {
   mark.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
 }
 
-async function verifyWidth(width) {
-  const page = await loadPage(width);
-  const { window, document } = page;
-  assert.deepEqual(page.errors, [], "All charts must render without errors");
-  assert.equal(document.querySelectorAll(".chart-host svg").length, 9);
-  assert.equal(document.querySelectorAll(".error-message").length, 0);
-  questions.forEach((question, i) => assert.equal(document.getElementById("heading-q" + (i + 1)).textContent, question));
-  Object.entries(originalExplanations).forEach(([source, block]) => {
-    const element = [...document.querySelectorAll(".chart-explanation")].find(e => e.dataset.explanationSource === source);
-    assert.equal(element.outerHTML, block, "Yibo explanation changed: " + source);
-  });
-  const counts = { q1: 11, q2: 9, q3: 7, q4: 22, q5: 5, e1: 55, e2: 28, e3a: 10, e3b: 14 };
-  Object.entries(counts).forEach(([key, expected]) => {
-    const chart = document.getElementById("chart-" + key);
-    assert.equal(chart.querySelectorAll(".mark").length, expected, key + " interactive marks");
-    chart.querySelectorAll(".mark").forEach(mark => {
-      assert.equal(mark.getAttribute("role"), "button");
-      assert.equal(mark.getAttribute("tabindex"), "0");
-      assert.ok(!/NaN|undefined/.test(mark.outerHTML), key + " mark must have valid geometry");
-    });
-    assert.equal(document.querySelectorAll("#table-" + key + " tbody tr").length, data[key].length);
-    assert.match(document.getElementById("readout-" + key).textContent, /Arithmetic mean|arithmetic mean|Each mean/);
-  });
-  if (process.argv[3]) {
-    const output = path.resolve(process.argv[3]);
-    fs.mkdirSync(output, { recursive: true });
-    Object.keys(counts).forEach(key => {
-      const svg = document.querySelector("#chart-" + key + " svg").cloneNode(true);
-      svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-      const dimensions = svg.getAttribute("viewBox").split(" ").map(Number);
-      svg.setAttribute("width", width);
-      svg.setAttribute("height", Math.round(dimensions[3] / dimensions[2] * width));
-      const svgStyle = document.createElementNS("http://www.w3.org/2000/svg", "style");
-      svgStyle.textContent = css;
-      svg.prepend(svgStyle);
-      fs.writeFileSync(path.join(output, width + "-" + key + ".svg"), svg.outerHTML);
-    });
-  }
-  const q1 = document.querySelector("#chart-q1 .mark[aria-label^='2019:']");
-  click(window, q1);
-  assert.equal(q1.getAttribute("aria-pressed"), "true");
-  assert.ok(q1.classList.contains("is-selected"));
-  assert.equal(window.getComputedStyle(q1).fill, "var(--orange)");
-  assert.match(document.getElementById("readout-q1").textContent, /39,866.*above.*37,353\.1/);
-  assert.equal(document.querySelectorAll("#chart-q1 .is-selected").length, 1);
-  click(window, q1);
-  assert.equal(q1.getAttribute("aria-pressed"), "false", "Clicking again must clear selection");
-  q1.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
-  assert.equal(q1.getAttribute("aria-pressed"), "true", "Keyboard Enter selects a bar");
-  document.querySelector('[data-reset="q1"]').click();
-  assert.equal(q1.getAttribute("aria-pressed"), "false");
-  assert.match(document.getElementById("readout-q1").textContent, /37,353\.1/);
+function change(window, document, id, value) {
+  const select = document.getElementById(id);
+  select.value = value;
+  select.dispatchEvent(new window.Event("change", { bubbles: true }));
+}
 
-  const map = document.getElementById("chart-q2");
-  assert.equal(map.querySelectorAll("path.map-state").length, 8, "Q2 must draw eight geographic regions");
-  assert.equal(map.querySelectorAll("svg rect:not(.map-water)").length, 0, "Q2 must not contain bars");
-  assert.equal(map.querySelectorAll(".map-region-list button").length, 8);
-  const vic = map.querySelector(".map-state[aria-label^='Victoria:']");
-  click(window, vic);
-  assert.match(document.getElementById("readout-q2").textContent, /Victoria.*11,130.*4,879\.4/);
-  const actButton = [...map.querySelectorAll(".map-region-list button")].find(e => e.textContent.startsWith("ACT"));
-  actButton.click();
-  assert.equal(map.querySelectorAll(".is-selected").length, 2, "ACT boundary and enlarged callout highlight together");
-  assert.match(document.getElementById("readout-q2").textContent, /Australian Capital Territory.*740.*below/);
-  document.querySelector('[data-reset="q2"]').click();
-  assert.equal(map.querySelectorAll(".is-selected").length, 0);
-  assert.equal(actButton.getAttribute("aria-pressed"), "false");
-
-  const age = document.querySelector("#chart-q3 .mark[aria-label^='40-64:']");
-  age.dispatchEvent(new window.KeyboardEvent("keydown", { key: " ", bubbles: true }));
-  assert.match(document.getElementById("readout-q3").textContent, /13,026.*5,643\.6/);
-  const male = document.querySelector("#chart-q4 .mark[aria-label^='2021 · Male:']");
-  const female = document.querySelector("#chart-q4 .mark[aria-label^='2021 · Female:']");
-  click(window, male);
-  const maleReadout = document.getElementById("readout-q4").textContent;
-  click(window, female);
-  const femaleReadout = document.getElementById("readout-q4").textContent;
-  assert.match(maleReadout, /25,788/);
-  assert.match(femaleReadout, /13,716/);
-  assert.notEqual(maleReadout, femaleReadout, "Q4 must compare each sex with its own average");
-  const road = document.querySelector("#chart-q5 .mark[aria-label^='Vehicle occupants:']");
-  click(window, road);
-  assert.match(document.getElementById("readout-q5").textContent, /19,524.*7,901\.0/);
-  const heat = document.querySelector("#chart-e2 .mark[aria-label^='40-64 \/ Pedal cyclist:']");
-  assert.equal(document.getElementById("e2").closest("details"), null, "The restored heatmap must be visible outside collapsed further analysis");
-  const originalFill = heat.getAttribute("fill");
-  assert.equal(originalFill, "rgb(184, 63, 75)", "The largest increase must use the restored red scale endpoint");
-  assert.equal(heat.getAttribute("rx"), null, "The original heatmap uses joined square cells");
-  assert.equal(document.querySelector("#chart-e2 .heatmap-title").textContent.replace(/Ageand/, "Age and"),
-    "Change in Hospitalisations by Age and Road User, 2011–2021");
-  click(window, heat);
-  assert.ok(heat.classList.contains("is-selected"), "Clicking the restored heatmap must highlight the cell");
-  assert.match(document.getElementById("readout-e2").textContent, /1,376/);
-  document.querySelector('[data-reset="e2"]').click();
-  assert.equal(heat.classList.contains("is-selected"), false);
-  assert.equal(heat.getAttribute("fill"), originalFill, "Reset must restore the cell's original heatmap colour");
-  click(window, heat);
-  const point = document.querySelector("#chart-e1 .mark[aria-label^='2021 · Cyclists:']");
-  click(window, point);
-  assert.match(document.getElementById("readout-e1").textContent, /20\.7%.*percentage points/);
-  document.querySelector('[data-download="q1"]').click();
-  assert.equal(page.downloadName(), "q1-hospitalisation-data.csv");
-  assert.ok(page.downloaded().size > 150, "CSV must include the actual values");
-  const csv = await new Promise((resolve, reject) => {
-    const reader = new window.FileReader();
+async function downloadCSV(page, key) {
+  page.document.querySelector('[data-download="' + key + '"]').click();
+  return new Promise((resolve, reject) => {
+    const reader = new page.window.FileReader();
     reader.onload = () => resolve(reader.result);
     reader.onerror = reject;
     reader.readAsText(page.downloaded());
   });
-  assert.match(csv, /"2019","39866"/, "CSV must preserve the selected year's unformatted source count");
-  assert.equal(csv.trim().split(/\r?\n/).length, 12, "CSV must include all 11 years and a header");
+}
+
+async function verifyWidth(width) {
+  const page = await loadPage(width);
+  const { window, document } = page;
+  const keys = ["q1", "q2", "q3", "q4", "q5", "e1", "e2", "e3a", "e3b"];
+  const explanation = key => document.querySelector('[data-explanation-key="' + key + '"]').textContent;
+  const marks = key => [...document.querySelectorAll("#chart-" + key + " .mark")];
+  const values = key => marks(key).map(mark => mark.__data__.row.value);
+  const total = key => values(key).reduce((sum, value) => sum + value, 0);
+  const tableRows = key => [...document.querySelectorAll("#table-" + key + " tbody tr")];
+  const reset = () => document.getElementById("reset-filters").click();
+  const filter = (key, value) => change(window, document, "filter-" + key, value);
+  const validGeometry = () => {
+    assert.deepEqual(page.errors, []);
+    assert.doesNotMatch(document.querySelector("main").innerHTML, /NaN|undefined/);
+    document.querySelectorAll(".chart-host .mark").forEach(mark => {
+      assert.equal(mark.getAttribute("role"), "button");
+      assert.equal(mark.getAttribute("tabindex"), "0");
+      assert.ok(mark.getAttribute("aria-label"));
+    });
+  };
+  const coherentLabels = year => keys.forEach(key => {
+    assert.match(document.querySelector("#" + key + " .chart-caption").textContent, new RegExp(year));
+    assert.equal(document.querySelectorAll("#table-" + key + " table").length, 1, "Tables must be replaced, not duplicated");
+  });
+  assert.equal(document.documentElement.dataset.filtersReady, "true");
+  ["year", "group", "sex", "age"].forEach(key => {
+    assert.equal(document.getElementById("filter-" + key).value, "all");
+    assert.equal(document.getElementById("filter-" + key).disabled, false);
+  });
+  assert.equal(document.querySelectorAll(".chart-filter-scope").length, 9);
+  assert.equal(document.getElementById("q3-year"), null, "Conflicting local year controls must be removed");
+  assert.equal(document.getElementById("q4-year"), null);
+  assert.equal(document.getElementById("q3-age"), null);
+  assert.equal(document.querySelectorAll(".chart-host svg").length, 13);
+  assert.equal(total("q1"), 410884);
+  assert.equal(total("q3"), 410884, "Unknown age must be included in all-years totals");
+  assert.equal(document.getElementById("filtered-total").textContent, "410,884");
+  assert.equal(document.getElementById("annual-average").textContent, "37,353.1");
+  assert.match(explanation("q4"), /Other \/ not recorded: 15/);
+  assert.equal(total("e2"), 5472, "Age-by-road-user differences must reconcile to national 2021 minus 2011");
+  questions.forEach((question, i) => assert.equal(document.getElementById("heading-q" + (i + 1)).textContent, question));
+  assert.doesNotMatch(document.body.textContent, /yibo|rowan hogan/i);
+  assert.doesNotMatch(document.querySelector('meta[name="description"]').content, /yibo/i);
+  assert.ok([...document.querySelectorAll(".explanation-panel > .eyebrow")].every(p => p.textContent === "CHART ANALYSIS"));
+  function verifyYearBins() {
+    const bars = [...document.querySelectorAll("#chart-q1 .year-bin")];
+    bars.forEach((bar, i) => {
+      assert.ok(Number(bar.getAttribute("width")) > 0);
+      if (i) {
+        const previous = bars[i - 1];
+        assert.ok(Math.abs(Number(bar.getAttribute("x")) - Number(previous.getAttribute("x")) - Number(previous.getAttribute("width"))) < 1e-6);
+      }
+    });
+  }
+  verifyYearBins();
+  const peak = document.querySelector("#chart-q1 .peak-year");
+  assert.match(peak.getAttribute("aria-label"), /^2019:/);
+  peak.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+  assert.equal(peak.getAttribute("aria-pressed"), "true");
+  assert.match(document.getElementById("readout-q1").textContent, /39,866/);
+  document.querySelector('[data-reset="q1"]').click();
+  assert.equal(peak.getAttribute("aria-pressed"), "false");
+  validGeometry();
+
+  for (const row of data.q1) {
+    filter("year", row.label);
+    assert.equal(total("q1"), row.value, "The shared year must update the national count");
+    assert.equal(total("q3"), row.value, "The shared year must update the age chart");
+    assert.equal(total("q5") / 2, row.value, "Bars and pie must both use the shared year's road-user counts");
+    assert.equal(tableRows("q1").length, 1);
+    coherentLabels(row.label);
+  }
+  filter("year", "2021");
+  assert.equal(document.getElementById("filtered-total").textContent, "39,505");
+  assert.equal(total("q2") - 740, 39035, "The map includes the ACT callout as a second selectable mark");
+  assert.equal(document.querySelectorAll("#chart-q2 path.map-state").length, 8);
+  assert.match(explanation("q4"), /Other \/ not recorded: 1/);
+  const act = [...document.querySelectorAll("#chart-q2 .map-region-list button")].find(button => button.textContent.startsWith("ACT"));
+  act.click();
+  assert.equal(document.querySelectorAll("#chart-q2 .is-selected").length, 2);
+  assert.match(document.getElementById("readout-q2").textContent, /740/);
+  document.querySelector('[data-reset="q2"]').click();
+  const road = document.querySelector("#chart-q5 .mark[aria-label^='Vehicle occupants:']");
+  click(window, road);
+  assert.equal(document.querySelectorAll("#chart-q5 .is-selected").length, 2);
   await page.resize(width === 330 ? 740 : 330);
-  assert.equal(document.querySelectorAll(".chart-host svg").length, 9, "Resizing must not duplicate SVGs");
-  assert.match(document.getElementById("readout-q5").textContent, /19,524/, "Selection survives resizing");
-  assert.equal(document.querySelectorAll("#chart-q5 .is-selected").length, 1);
+  assert.equal(document.querySelectorAll("#chart-q5 .is-selected").length, 2);
+  verifyYearBins();
+  const svgCount = document.querySelectorAll(".chart-host svg").length;
+  await page.resize(width);
+  assert.equal(document.querySelectorAll(".chart-host svg").length, svgCount, "Resizing must not duplicate charts");
+
+  filter("group", "Motorcyclists");
+  assert.equal(total("q1"), 8883);
+  assert.equal(total("q3"), 8883);
+  assert.equal(total("q5") / 2, 8883);
+  assert.equal(tableRows("q5").length, 1);
+  assert.ok(marks("e1").every(mark => mark.__data__.row[mark.__data__.series] === 100));
+  assert.equal(document.querySelector("#chart-q5 .road-icon").textContent, "🏍️", "A filtered category keeps its matching icon");
+  filter("sex", "Female");
+  assert.equal(total("q1"), 992, "Joint road-user and sex filters must use real intersected counts");
+  assert.equal(total("q3"), 992);
+  assert.match(explanation("q4"), /Female: 992 \(100\.0%\)/);
+  assert.equal(document.querySelectorAll("#chart-q4 .pie-panel").length, 1);
+  assert.match(document.querySelector("#chart-q2 .empty-message").textContent, /does not provide joint state counts/);
+  assert.equal(document.querySelectorAll("#chart-q2 .mark").length, 0, "Unsupported joint filters must clear stale map values");
+  assert.equal(document.querySelector('[data-download="q2"]').disabled, true);
+  const jointExpected = globalData.records.filter(row => row.year === "2021" && row.group === "Motorcyclists" && row.sex === "Female" && row.age === "40-64")
+    .reduce((sum, row) => sum + row.cases, 0);
+  filter("age", "40-64");
+  assert.equal(total("q1"), jointExpected);
+  assert.equal(total("q3"), jointExpected);
+  assert.equal(tableRows("q3").length, 1);
+  const csv = await downloadCSV(page, "q3");
+  assert.match(csv, /"Year filter","Road-user filter","Sex filter","Age filter"/);
+  assert.match(csv, /"2021","2021","Motorcyclists","Female","40-64","40-64"/);
+  assert.ok(csv.includes('"' + jointExpected + '"'));
+  assert.equal(page.downloadName(), "q3-2021-hospitalisation-data.csv");
+  validGeometry();
+
+  reset();
+  filter("sex", "Female");
+  change(window, document, "q3-view", "trend");
+  assert.equal(tableRows("q3").length, 11);
+  filter("year", "2019");
+  assert.equal(tableRows("q3").length, 1, "The global year must also apply to trend view");
+  assert.equal(total("q1"), 14499);
+  assert.equal(document.getElementById("filter-year").disabled, false);
+  assert.match(explanation("q3"), /2019/);
+  validGeometry();
+
+  reset();
+  filter("year", "2011");
+  filter("age", "0-7");
+  assert.match(document.querySelector("#chart-q2 .map-state[aria-label^='Australian Capital Territory:']").getAttribute("aria-label"), /not published/);
+  const suppressed = document.querySelector("#chart-q2 .map-state[aria-label^='Australian Capital Territory:']");
+  assert.equal(suppressed.getAttribute("fill"), "#d9dfdc");
+  click(window, suppressed);
+  assert.match(document.getElementById("readout-q2").textContent, /not published/);
+  const mapCSV = await downloadCSV(page, "q2");
+  assert.match(mapCSV, /"Australian Capital Territory","Not published"/);
+  assert.equal(total("e2"), 0, "The baseline year compared with itself has zero changes");
+  validGeometry();
+
+  reset();
+  filter("year", "2011");
+  filter("age", "Unknown");
+  filter("sex", "Female");
+  assert.equal(document.getElementById("filtered-total").textContent, "0");
+  assert.match(document.querySelector("#chart-q1 .empty-message").textContent, /No hospitalisations match/);
+  assert.match(document.querySelector("#chart-e3a .empty-message").textContent, /nonzero/);
+  assert.equal(document.querySelector('[data-download="q1"]').disabled, true);
+  validGeometry();
+
+  reset();
+  filter("age", "Unknown");
+  assert.equal(total("q1"), 1);
+  assert.equal(marks("e1").length, 5, "Undefined shares in zero-case years must not be plotted as zero");
+  assert.equal(marks("e1")[0].__data__.row.label, "2014");
+  validGeometry();
+  reset();
+  assert.equal(total("q1"), 410884);
+  assert.equal(document.querySelectorAll(".chart-host svg").length, 13);
+  assert.equal(document.querySelectorAll("#chart-q2 .map-state").length, 8, "Reset restores the map after unsupported filters");
+  const seriesSums = { Hospitalisations: 0, "Bed days": 0 };
+  marks("e3a").forEach(mark => { seriesSums[mark.__data__.series] += mark.__data__.row[mark.__data__.series]; });
+  Object.values(seriesSums).forEach(value => assert.ok(Math.abs(value - 100) < 1e-8));
   document.querySelector(".supplementary").open = true;
   await new Promise(resolve => setTimeout(resolve, 20));
-  assert.match(document.getElementById("readout-e2").textContent, /1,376/, "Expanding deeper analysis preserves selection");
-  assert.deepEqual(page.errors, []);
+  assert.equal(document.querySelectorAll(".chart-host svg").length, 13);
+  validGeometry();
   page.dom.window.close();
-  console.log("PASS at chart width " + width + ": all nine charts, map/ACT, averages, click, keyboard, reset, CSV, resize, exact explanations and headings.");
+  console.log("PASS at width " + width + ": all nine questions, every year, joint filters, map coverage and suppression, trend, CSV context, keyboard, reset, resize, no personal names, and zero-case recovery.");
 }
 
 (async () => {
-  assert.equal(questions.length, 5);
-  assert.equal(data.q1.reduce((sum, row) => sum + row.value, 0) / 11, 37353.09090909091);
-  assert.equal(data.q2.reduce((sum, row) => sum + row.value, 0), 39035);
   await verifyWidth(740);
   await verifyWidth(330);
   const degraded = await loadPage(740, true);
-  assert.equal(degraded.document.querySelectorAll(".chart-host svg").length, 8);
   assert.match(degraded.document.querySelector("#chart-q2 .error-message").textContent, /map could not load/);
   assert.equal(degraded.document.querySelectorAll("#table-q2 tbody tr").length, 8);
+  assert.equal(degraded.document.querySelectorAll("#chart-q1 .mark").length, 11);
   degraded.dom.window.close();
-  console.log("PASS graceful map-load failure: other charts and state data remain usable.");
+  const noFilters = await loadPage(740, false, true);
+  assert.equal(noFilters.document.getElementById("filter-year").disabled, true);
+  assert.match(noFilters.document.getElementById("global-filter-status").textContent, /Shared filters could not load/);
+  assert.equal(noFilters.document.querySelectorAll("#chart-q3 .mark").length, 7);
+  assert.equal(noFilters.document.querySelectorAll("#chart-q4 .mark").length, 22);
+  noFilters.dom.window.close();
+  console.log("PASS map-load and shared-data failure: usable original charts and reference data remain available.");
 })().catch(error => { console.error(error); process.exitCode = 1; });

@@ -1,0 +1,38 @@
+{
+  "q1": [
+    "Hospitalisations for road traffic injuries increased from 34,033 in 2011 to 39,505 in 2021, an overall rise of 16.1%. The highest annual count was 39,866 in 2019. Counts fell to 37,966 in 2020 before increasing again in 2021.",
+    "The dashed line shows the annual average of 37,353.1 hospitalisations across the 11 years. The figures show a generally upward trend with a decline in 2020; they do not establish what caused the changes."
+  ],
+  "q2": [
+    "In 2021, Victoria recorded 11,130 hospitalisations, followed by Queensland with 10,447 and New South Wales with 9,003. Together, these jurisdictions accounted for 77.4% of the national count. The Northern Territory and Australian Capital Territory recorded 710 and 740 respectively.",
+    "Darker map shading represents a higher count. These totals are not adjusted for population or travel exposure, so differences between jurisdictions should not be interpreted as differences in individual risk."
+  ],
+  "q3": [
+    "In 2021, people aged 40–64 recorded the highest count at 13,026 hospitalisations, followed by those aged 26–39 with 9,423 and 17–25 with 8,010. Together, these groups accounted for 77.1% of the national count.",
+    "The age bands have unequal widths. Counts describe the distribution of hospitalisations across the reported groups and do not measure age-specific risk."
+  ],
+  "q4": [
+    "Across 2011–2021, the recorded counts totalled 266,763 hospitalisations for males and 144,106 for females. Males accounted for 64.9% of the combined recorded male and female count. A further 15 cases had no recorded male/female classification and are excluded from these shares.",
+    "Road-user shares within each sex use that sex's total as the denominator. Counts and proportions are not adjusted for population size or travel exposure and should not be interpreted as measures of individual risk."
+  ],
+  "q5": [
+    "Vehicle occupants accounted for 19,524 hospitalisations in 2021, or 49.4% of the national count. Motorcyclists accounted for 8,883 cases (22.5%), cyclists for 8,163 (20.7%), pedestrians for 2,334 (5.9%), and other or unknown road users for 601 (1.5%).",
+    "The bars compare counts, while the pie shows each group's share of the same total. Selecting a category highlights it in both views. These shares describe the composition of hospitalisations, rather than risk per person or per journey."
+  ],
+  "e1": [
+    "The cyclist share of hospitalisations rose from 15.8% in 2011 to 21.9% in 2020, before falling to 20.7% in 2021. The 2021 share remained above both 2011 and 2019, when it was 18.3%.",
+    "Over the same period, the vehicle-occupant share fell from approximately 52.0% to 49.4%, while the motorcyclist share remained around 22–23%. A change in share reflects a group's position within the annual total and does not necessarily mean its count changed in the same direction."
+  ],
+  "e2": [
+    "Between 2011 and 2021, cyclist hospitalisations increased by 1,376 among people aged 40–64, the largest increase among the displayed age and road-user combinations. Cyclist counts also rose by 509 among those aged 65–74 and by 198 among those aged 75 and over.",
+    "Car-driver hospitalisations increased most among people aged 26–39, with 781 additional cases. Pedestrians aged 17–25 recorded the largest decline at 194 fewer cases. Each cell shows the 2021 count minus the 2011 count; these changes are not adjusted for population ageing or travel exposure."
+  ],
+  "e3a": [
+    "During 2016–2021, cyclists accounted for 19.02% of hospitalisations but 11.13% of bed days. Pedestrians accounted for 6.49% of hospitalisations and 13.14% of bed days, while motorcyclists accounted for 22.27% and 25.02% respectively.",
+    "A higher bed-day share than hospitalisation share indicates a longer average hospital stay relative to the overall average. Bed days measure hospital resource use; they do not provide a complete measure of injury severity because length of stay also depends on treatment, other health conditions, and discharge arrangements."
+  ],
+  "e3b": [
+    "During 2016–2021, people aged 40–64 accounted for the largest shares of hospitalisations (32.82%) and bed days (34.17%). People aged 65–74 accounted for 7.31% of hospitalisations and 11.18% of bed days; those aged 75 and over accounted for 6.23% and 13.29% respectively.",
+    "The larger bed-day shares among older groups indicate longer average hospital stays relative to the overall average. By comparison, people aged 8–16 accounted for 6.61% of hospitalisations and 3.53% of bed days. These differences describe hospital resource use and should not be treated as direct measures of injury severity."
+  ]
+}
