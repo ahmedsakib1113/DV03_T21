@@ -103,6 +103,7 @@ button:disabled { opacity: .6; cursor: default; }
 .grid line { stroke: #edf1eb; }
 .grid text { fill: #63757b; font-size: 11px; }
 .mark { cursor: pointer; transition: fill .16s, stroke .16s, opacity .16s; }
+rect.mark { stroke: #174e4c; stroke-width: 1px; vector-effect: non-scaling-stroke; }
 .mark:hover, .mark:focus-visible, .mark.is-selected { fill: var(--orange) !important; stroke: #7d300e; stroke-width: 2.5px; outline: none; }
 .chart-point:hover, .chart-point:focus-visible, .chart-point.is-selected { r: 7; }
 .average-line { stroke: #88651f; stroke-width: 1.5px; stroke-dasharray: 6 5; pointer-events: none; }
@@ -123,6 +124,7 @@ button:disabled { opacity: .6; cursor: default; }
 .chart-explanation p { margin: 0 0 14px; }
 .chart-explanation p:last-child { margin-bottom: 0; }
 .chart-tooltip { display: none; position: absolute; z-index: 4; background: #103544; color: white; border-radius: 5px; padding: 9px 12px; max-width: min(260px, 90%); pointer-events: none; font-size: 11px; line-height: 1.6; box-shadow: 0 3px 14px #0002; }
+.chart-tooltip > div + div { margin-top: 4px; }
 .map-label { fill: #173642; font-size: 12px; font-weight: 700; pointer-events: none; paint-order: stroke; stroke: #fff; stroke-width: 3px; stroke-linejoin: round; }
 .map-value { font-size: 10px; font-weight: 500; }
 .map-water { fill: #f1f6f6; }

@@ -146,7 +146,34 @@ async function verifyWidth(width) {
   verifyYearBins();
   const peak = document.querySelector("#chart-q1 .peak-year");
   assert.match(peak.getAttribute("aria-label"), /^2019:/);
+  assert.equal(document.querySelectorAll(".chart-host svg title, .chart-host [title]").length, 0,
+    "Native titles must not produce a second tooltip; SVGs and marks use ARIA labels");
+  document.querySelectorAll(".chart-host svg").forEach(svg => assert.ok(svg.getAttribute("aria-label")));
+  document.querySelectorAll("rect.mark").forEach(mark => {
+    const style = window.getComputedStyle(mark);
+    assert.equal(style.stroke, "#174e4c", "Bars and heatmap cells must have visible outlines before interaction");
+    assert.equal(style.strokeWidth, "1px");
+  });
+  const tooltip = document.querySelector("#chart-q1 .chart-tooltip");
+  peak.dispatchEvent(new window.MouseEvent("pointerenter", { clientX: width - 5, clientY: 100 }));
+  assert.equal(tooltip.style.display, "block");
+  assert.deepEqual([...tooltip.children].map(line => line.textContent), [
+    "2019: 39,866 hospitalisations.",
+    "2,512.9 hospitalisations above the average.",
+    "Average: 37,353.1 hospitalisations."
+  ]);
+  peak.dispatchEvent(new window.MouseEvent("pointermove", { clientX: 120, clientY: 110 }));
+  assert.equal(tooltip.children.length, 3, "Pointer movement must replace tooltip lines, not duplicate them");
+  const otherMark = marks("q3")[0];
+  otherMark.dispatchEvent(new window.FocusEvent("focus"));
+  assert.equal(document.querySelectorAll('.chart-tooltip[style*="display: block"]').length, 1,
+    "Only one tooltip may remain visible across pointer and keyboard interactions");
+  otherMark.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  assert.equal(document.querySelectorAll('.chart-tooltip[style*="display: block"]').length, 0);
+  peak.dispatchEvent(new window.FocusEvent("focus"));
+  assert.equal(tooltip.style.display, "block");
   peak.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+  assert.equal(tooltip.style.display, "none");
   assert.equal(peak.getAttribute("aria-pressed"), "true");
   assert.match(document.getElementById("readout-q1").textContent, /39,866/);
   document.querySelector('[data-reset="q1"]').click();

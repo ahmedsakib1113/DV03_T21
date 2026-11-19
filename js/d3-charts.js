@@ -58,22 +58,24 @@
       strong.textContent = text;
       readout.append(strong, document.createTextNode(". " + config.averageNote));
     };
-    state.describe = (row, series) => {
-      if (row[series] === null) return row.label + ": not published for this selection.";
+    state.describeLines = (row, series) => {
+      if (row[series] === null) return [row.label + ": not published for this selection."];
       if (state.config.type === "sex-composition") {
         const isTotal = row.label === "All selected road users";
         const denominator = isTotal ? d3.sum(Object.values(state.sexTotals)) : state.sexTotals[series];
-        return row.label + " · " + series + ": " + count.format(row[series]) + " hospitalisations. " +
+        return [row.label + " · " + series + ": " + count.format(row[series]) + " hospitalisations.",
           (denominator ? format(row[series] / denominator * 100, true) : "No defined share") + " of " +
-          (isTotal ? "matching cases" : series.toLowerCase() + " cases") +
-          " · " + state.period + ".";
+          (isTotal ? "matching cases" : series.toLowerCase() + " cases") + ".",
+          "Period: " + state.period + "."];
       }
       const label = config.label ? config.label(row) : row.label;
-      return label + (series === "value" ? "" : " · " + series) + ": " +
-        (config.percent ? format(row[series], true) : count.format(row[series])) + ". " +
-        comparison(row[series], state.averages[series], config.percent) +
-        " (" + format(state.averages[series], config.percent) + ").";
+      const unit = config.percent ? "" : state.key === "e2" ? " change in hospitalisations" : " hospitalisations";
+      return [label + (series === "value" ? "" : " · " + series) + ": " +
+        (config.percent ? format(row[series], true) : count.format(row[series])) + unit + ".",
+        comparison(row[series], state.averages[series], config.percent) + ".",
+        "Average: " + format(state.averages[series], config.percent) + unit + "."];
     };
+    state.describe = (row, series) => state.describeLines(row, series).join(" ");
     state.select = (row, series) => {
       const selection = { label: row.label, series };
       state.selected = state.selected && state.selected.label === selection.label &&
@@ -137,9 +139,7 @@
     const svg = d3.select(state.host).append("svg")
       .attr("viewBox", "0 0 " + width + " " + height)
       .attr("role", "group")
-      .attr("aria-labelledby", "svg-title-" + state.key);
-    svg.append("title").attr("id", "svg-title-" + state.key)
-      .text(document.getElementById("heading-" + state.key).textContent);
+      .attr("aria-label", document.getElementById("heading-" + state.key).textContent);
     state.tooltip = d3.select(state.host).append("div").attr("class", "chart-tooltip").attr("aria-hidden", "true");
     return { svg, width, height };
   }
@@ -147,14 +147,22 @@
   function bindMarks(state, marks) {
     const tooltip = state.tooltip;
     function describe(event, item) {
-      tooltip.style("display", "block").text(state.describe(item.row, item.series));
+      // Native SVG titles would create a second tooltip over this custom one.
+      d3.selectAll(".chart-tooltip").style("display", "none");
+      tooltip.style("display", "block").selectAll("div")
+        .data(state.describeLines(item.row, item.series)).join("div").text(line => line);
+      const box = tooltip.node().getBoundingClientRect();
+      const hostBox = state.host.getBoundingClientRect();
+      let point;
       if (event.type.startsWith("pointer")) {
-        const point = d3.pointer(event, state.host);
-        const left = Math.max(4, Math.min(point[0] + 12, state.width - 250));
-        tooltip.style("left", left + "px").style("top", Math.max(0, point[1] - 55) + "px");
+        point = d3.pointer(event, state.host);
       } else {
-        tooltip.style("left", "15px").style("top", "10px");
+        const markBox = event.currentTarget.getBoundingClientRect();
+        point = [markBox.left - hostBox.left + markBox.width / 2, markBox.top - hostBox.top];
       }
+      const left = Math.max(4, Math.min(point[0] + 12, state.width - box.width - 4));
+      const top = point[1] >= box.height + 12 ? point[1] - box.height - 12 : point[1] + 16;
+      tooltip.style("left", left + "px").style("top", top + "px");
     }
     marks.attr("class", function () { return (this.getAttribute("class") || "") + " mark"; })
       .attr("tabindex", 0).attr("role", "button").attr("aria-pressed", "false")
@@ -167,12 +175,15 @@
         tooltip.style("display", "none");
       })
       .on("keydown", (event, item) => {
+        if (event.key === "Escape") {
+          tooltip.style("display", "none");
+          return;
+        }
         if (event.key !== "Enter" && event.key !== " ") return;
         event.preventDefault();
         state.select(item.row, item.series);
         tooltip.style("display", "none");
       });
-    marks.append("title").text(item => state.describe(item.row, item.series));
   }
 
   function addLegend(state, entries) {
@@ -518,8 +529,7 @@
     panel.append("h4").text(title);
     const total = d3.sum(rows, row => row[series]);
     const svg = panel.append("svg").attr("viewBox", "0 0 280 245")
-      .attr("role", "group").attr("aria-labelledby", id);
-    svg.append("title").attr("id", id).text(title + " · " + (state.period || "2021"));
+      .attr("role", "group").attr("aria-label", title + " · " + (state.period || "2021"));
     const pie = d3.pie().sort(null).value(row => row[series])(rows);
     const arc = d3.arc().innerRadius(0).outerRadius(99);
     const marks = svg.append("g").attr("transform", "translate(140,120)")
