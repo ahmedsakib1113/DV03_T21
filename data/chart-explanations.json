@@ -17,7 +17,7 @@
   ],
   "q5": [
     "Vehicle occupants accounted for 19,524 hospitalisations in 2021, or 49.4% of the national count. Motorcyclists accounted for 8,883 cases (22.5%), cyclists for 8,163 (20.7%), pedestrians for 2,334 (5.9%), and other or unknown road users for 601 (1.5%).",
-    "The bars compare counts, while the pie shows each group's share of the same total. Selecting a category highlights it in both views. These shares describe the composition of hospitalisations, rather than risk per person or per journey."
+    "The horizontal bars compare hospitalisation counts across road-user groups. Select a bar to compare its count with the average across the displayed groups. These counts and shares describe hospitalisations, rather than risk per person or per journey."
   ],
   "e1": [
     "The cyclist share of hospitalisations rose from 15.8% in 2011 to 21.9% in 2020, before falling to 20.7% in 2021. The 2021 share remained above both 2011 and 2019, when it was 18.3%.",

@@ -623,12 +623,6 @@
     else if (state.config.type === "lines") drawLines(state);
     else if (state.config.type === "heatmap") drawHeatmap(state);
     else if (state.config.type === "sex-composition") drawSexComposition(state);
-    else if (state.key === "q5") {
-      drawHorizontal(state);
-      const panel = d3.select(state.host).append("div").attr("class", "road-user-pie");
-      appendPie(state, panel, state.rows, "value", "Share of matching road-user hospitalisations · " + (state.period || "2021"), "pie-q5-title");
-      updateSelection(state);
-    }
     else drawBars(state);
   }
 

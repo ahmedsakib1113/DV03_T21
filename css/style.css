@@ -94,9 +94,6 @@ button:disabled { opacity: .6; cursor: default; }
 .pie-legend .legend-swatch { flex: 0 0 11px; }
 .road-icon { flex: 0 0 20px; text-align: center; }
 .pie-percentage, .sex-share-label { font-size: 13px; font-weight: 650; fill: white; paint-order: stroke; stroke: #18393d; stroke-width: 2.5px; pointer-events: none; }
-.road-user-pie { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 12px; }
-.road-user-pie .pie-panel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 18px; align-items: center; }
-.road-user-pie h4 { grid-column: 1 / -1; }
 .chart-host svg { width: 100%; height: auto; display: block; overflow: visible; font-family: inherit; }
 .chart-host .axis { color: #63757b; font-size: 11px; }
 .axis .domain { stroke: #bac8c5; }
@@ -201,7 +198,7 @@ thead { background: #f3f6f0; }
   .global-filters { padding: 16px; }
   .global-filter-heading { flex-direction: column; gap: 10px; }
   .global-filters .chart-filters label { flex-basis: 100%; }
-  .sex-pies, .road-user-pie .pie-panel { grid-template-columns: 1fr; }
+  .sex-pies { grid-template-columns: 1fr; }
   .chart-filters { padding: 10px; }
   html { scroll-padding-top: 76px; }
   .wrap { width: calc(100% - 32px); }

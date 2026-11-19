@@ -60,7 +60,9 @@ const version = assetVersion();
     assert.equal(document.getElementById("filter-year").disabled, false);
     assert.equal(window.getComputedStyle(document.querySelector(".global-filters")).paddingTop, "24px", "Shared filter styling must load");
     assert.equal(window.getComputedStyle(document.querySelector(".chart-filters")).display, "flex");
-    assert.equal(document.querySelectorAll(".chart-host svg").length, 13);
+    assert.equal(document.querySelectorAll(".chart-host svg").length, 12);
+    assert.equal(document.querySelectorAll("#chart-q5 svg").length, 1);
+    assert.equal(document.querySelectorAll("#chart-q5 .pie-panel").length, 0);
     for (const [key, value, expected] of [["year", "2021", "39,505"], ["sex", "Female", "13,716"], ["group", "Motorcyclists", "992"]]) {
       const control = document.getElementById("filter-" + key);
       control.value = value;

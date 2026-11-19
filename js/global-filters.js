@@ -151,9 +151,9 @@ window.RoadInsightFilters = (() => {
       show("q5", roadRows, {
         type: "bars", horizontal: true, percent: false, averageTitle: "Average per displayed road-user group · " + period,
         averageNote: "Arithmetic mean across the displayed road-user groups.", tableLabel: "Road-user group"
-      }, { caption: "Road-user counts and shares" });
+      }, { caption: "Hospitalisations by road-user group" });
       explain("q5", [total ? "For " + scope + ", the road-user counts are " + roadRows.map(row => row.label + ": " + count.format(row.value) +
-        " (" + pct(row.value / total * 100) + ")").join("; ") + ". The bars and pie use the same filtered total and linked selection." : empty, riskNote]);
+        " (" + pct(row.value / total * 100) + ")").join("; ") + ". The horizontal bars compare counts. Select a bar to compare it with the average across the displayed groups." : empty, riskNote]);
 
       const shares = years.map(year => {
         const rows = records.filter(row => row.year === year), denominator = sum(rows);

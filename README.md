@@ -18,6 +18,8 @@ In Q1, choosing a year highlights that bar while keeping all 11 years visible. R
 
 Q2 supports year plus at most one demographic filter because the source has no joint state-level demographic table. Unsupported combinations show a message, and suppressed state counts remain labelled as not published. E2 compares the selected year with 2011; all years compares 2021 with 2011.
 
+Q5 uses a single horizontal bar chart to compare road-user counts, with selection, averages, and CSV downloads.
+
 To refresh the chart inputs, run `python scripts/build-chart-data.py`, then `python scripts/build-global-data.py`. The latter validates the workbook records against the existing CSV charts. See `data/README.md` for sources and denominator definitions.
 
 After editing styles, scripts, or chart data, run `node scripts/version-assets.cjs` before committing. It gives all assets a shared content version so browsers load matching files after a deployment. The verification script checks that the version is current.
