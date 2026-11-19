@@ -77,12 +77,12 @@
     state.select = (row, series) => {
       const selection = { label: row.label, series };
       state.selected = state.selected && state.selected.label === selection.label &&
-        state.selected.series === series ? null : selection;
+        state.selected.series === series ? state.filterSelection || null : selection;
       updateSelection(state);
     };
     controllers.set(key, state);
     document.querySelector('[data-reset="' + key + '"]').addEventListener("click", () => {
-      state.selected = null;
+      state.selected = state.filterSelection || null;
       updateSelection(state);
     });
     document.querySelector('[data-download="' + key + '"]').addEventListener("click", () => downloadCSV(state));
@@ -92,6 +92,10 @@
   }
 
   function updateSelection(state) {
+    if (state.unavailable) {
+      state.defaultReadout();
+      return;
+    }
     d3.select(state.host).selectAll(".mark")
       .classed("is-selected", d => Boolean(state.selected && d.row.label === state.selected.label && d.series === state.selected.series))
       .attr("aria-pressed", d => String(Boolean(state.selected && d.row.label === state.selected.label && d.series === state.selected.series)));
@@ -203,10 +207,13 @@
     svg.append("g").attr("class", "grid").attr("transform", "translate(" + margin.left + ",0)")
       .call(d3.axisLeft(y).ticks(5).tickSize(-(width - margin.left - margin.right)).tickFormat(d3.format("~s")))
       .call(g => g.select(".domain").remove());
-    const tickYears = years.filter((year, i) => !compact || i % 2 === 0 || i === years.length - 1);
+    const highlightedYear = state.filterSelection ? Number(state.filterSelection.label) : null;
+    const tickYears = years.filter((year, i) => !compact || year === highlightedYear ||
+      ((i % 2 === 0 || i === years.length - 1) && (highlightedYear === null || Math.abs(year - highlightedYear) > 1)));
     svg.append("g").attr("class", "axis").attr("transform", "translate(0," + baseline + ")")
       .call(d3.axisBottom(x).tickValues(tickYears.map(year => year + 0.5))
         .tickFormat(value => String(Math.floor(value))).tickSize(0).tickPadding(12));
+    svg.selectAll(".axis .tick text").classed("highlighted-year-label", value => Math.floor(value) === highlightedYear);
     svg.append("text").attr("class", "axis-title").attr("x", margin.left).attr("y", 13)
       .text("Hospitalisations");
     svg.append("text").attr("class", "axis-title").attr("x", (margin.left + width - margin.right) / 2)
@@ -219,7 +226,12 @@
       .attr("fill", palette[0]);
     bindMarks(state, marks);
     const peak = state.rows.find(row => row.value === d3.max(state.rows, d => d.value));
-    marks.classed("peak-year", item => item.row === peak);
+    marks.classed("peak-year", item => item.row === peak && highlightedYear === null);
+    const highlighted = state.rows.find(row => Number(row.label) === highlightedYear);
+    if (highlighted && highlighted.value === 0) {
+      svg.append("line").attr("class", "zero-year-highlight").attr("x1", x(highlightedYear))
+        .attr("x2", x(highlightedYear + 1)).attr("y1", baseline).attr("y2", baseline);
+    }
     svg.append("text").attr("class", "peak-label").attr("text-anchor", "middle")
       .attr("x", x(Number(peak.label) + 0.5)).attr("y", y(peak.value) - 12)
       .text("Peak · " + peak.label);
@@ -393,7 +405,7 @@
     } else {
       const legendX = width - 32, legendY = top + (bottom - top) / 2 - 60;
       const legendTitle = svg.append("text").attr("class", "heatmap-legend-label").attr("x", right + 8).attr("y", legendY - 30);
-      ["Change in", "hospitalisations", "(2021 − 2011)"].forEach((text, i) => {
+      ["Change in", "hospitalisations", "(" + (state.comparisonEnd || "2021") + " − 2011)"].forEach((text, i) => {
         legendTitle.append("tspan").attr("x", right + 8).attr("dy", i ? 13 : 0).text(text);
       });
       svg.append("rect").attr("x", legendX).attr("y", legendY + 12).attr("width", 12).attr("height", 120)
@@ -487,7 +499,7 @@
       state.config.label ? state.config.label(row) : row.label, ...state.series.map(series => row[series])
     ])];
     if (state.filters) {
-      rows[0].unshift("Period", "Year filter", "Road-user filter", "Sex filter", "Age filter");
+      rows[0].unshift("Period", state.key === "q1" ? "Highlighted year" : "Year filter", "Road-user filter", "Sex filter", "Age filter");
       rows.slice(1).forEach(row => row.unshift(state.period, state.filters.year, state.filters.group, state.filters.sex, state.filters.age));
     }
     const csv = rows.map(row => row.map(value => quote(value === null ? "Not published" : value)).join(",")).join("\r\n");
@@ -585,13 +597,14 @@
     state.interactionRows = options.interactionRows;
     state.sexTotals = options.sexTotals;
     state.comparisonEnd = options.comparisonEnd;
-    state.selected = null;
+    state.filterSelection = options.filterSelection || null;
+    state.selected = state.filterSelection;
     state.averages = options.averages || Object.fromEntries(state.series.map(series => [series, d3.mean(rows, row => row[series])]));
     const download = document.querySelector('[data-download="' + key + '"]');
     download.disabled = Boolean(state.unavailable);
     renderTable(state);
     redraw(state);
-    state.defaultReadout();
+    updateSelection(state);
   }
 
   function redraw(state) {

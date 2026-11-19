@@ -14,6 +14,8 @@ JavaScript files:
 
 The filter bar at the top applies year, road-user/vehicle group, sex, and age to all nine questions, including the figures at the top, explanations, tables, and CSV downloads. It defaults to all years (2011–2021) and all groups. Reset restores this selection. Q3 retains a comparison/trend display control; its trend also follows the shared year selection.
 
+In Q1, choosing a year highlights that bar while keeping all 11 years visible. Road-user, sex, and age filters still update the entire trend. Its average always uses all 11 years, and its CSV keeps the full trend with the highlighted year recorded separately. Reset selection restores the shared year highlight; Reset all filters removes it.
+
 Q2 supports year plus at most one demographic filter because the source has no joint state-level demographic table. Unsupported combinations show a message, and suppressed state counts remain labelled as not published. E2 compares the selected year with 2011; all years compares 2021 with 2011.
 
 To refresh the chart inputs, run `python scripts/build-chart-data.py`, then `python scripts/build-global-data.py`. The latter validates the workbook records against the existing CSV charts. See `data/README.md` for sources and denominator definitions.

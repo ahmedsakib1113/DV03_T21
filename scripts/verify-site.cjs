@@ -94,6 +94,7 @@ async function verifyWidth(width) {
   const marks = key => [...document.querySelectorAll("#chart-" + key + " .mark")];
   const values = key => marks(key).map(mark => mark.__data__.row.value);
   const total = key => values(key).reduce((sum, value) => sum + value, 0);
+  const highlightedValue = () => document.querySelector("#chart-q1 .year-bin.is-selected").__data__.row.value;
   const tableRows = key => [...document.querySelectorAll("#table-" + key + " tbody tr")];
   const reset = () => document.getElementById("reset-filters").click();
   const filter = (key, value) => change(window, document, "filter-" + key, value);
@@ -152,12 +153,31 @@ async function verifyWidth(width) {
 
   for (const row of data.q1) {
     filter("year", row.label);
-    assert.equal(total("q1"), row.value, "The shared year must update the national count");
+    assert.equal(total("q1"), 410884, "Q1 must keep the complete trend when a year is selected");
+    assert.equal(marks("q1").length, 11, "All eleven yearly bars must remain visible");
+    assert.equal(highlightedValue(), row.value);
+    assert.equal(document.querySelectorAll("#chart-q1 .is-selected").length, 1, "Only the chosen year is selected");
+    assert.equal(document.querySelector("#chart-q1 .is-selected").getAttribute("aria-pressed"), "true");
+    assert.equal(document.querySelector("#chart-q1 .highlighted-year-label").textContent, row.label);
+    assert.equal(document.querySelectorAll("#chart-q1 .peak-year").length, 0, "Other bars keep their original colour when a year is highlighted");
+    assert.match(document.querySelector("#chart-q1 .average-label").textContent, /37,353\.1/);
     assert.equal(total("q3"), row.value, "The shared year must update the age chart");
     assert.equal(total("q5") / 2, row.value, "Bars and pie must both use the shared year's road-user counts");
-    assert.equal(tableRows("q1").length, 1);
+    assert.equal(tableRows("q1").length, 11);
+    if (width === 740) assert.match(document.querySelector("#chart-e2 .heatmap-legend-label").textContent, new RegExp(row.label + " − 2011"));
     coherentLabels(row.label);
   }
+  filter("year", "2014");
+  assert.equal(highlightedValue(), 35515);
+  assert.match(document.getElementById("readout-q1").textContent, /2014.*35,515.*below.*37,353\.1/);
+  const trendCSV = await downloadCSV(page, "q1");
+  assert.match(trendCSV, /"Highlighted year"/);
+  assert.equal(trendCSV.trim().split(/\r?\n/).length, 12, "Q1 downloads must retain the full annual context");
+  assert.match(trendCSV, /"2011–2021","2014","all","all","all","2019","39866"/);
+  click(window, document.querySelector("#chart-q1 .year-bin[aria-label^='2019:']"));
+  assert.equal(highlightedValue(), 39866);
+  document.querySelector('[data-reset="q1"]').click();
+  assert.equal(highlightedValue(), 35515, "Reset selection restores the year chosen in the shared filter");
   filter("year", "2021");
   assert.equal(document.getElementById("filtered-total").textContent, "39,505");
   assert.equal(total("q2") - 740, 39035, "The map includes the ACT callout as a second selectable mark");
@@ -172,6 +192,7 @@ async function verifyWidth(width) {
   click(window, road);
   assert.equal(document.querySelectorAll("#chart-q5 .is-selected").length, 2);
   await page.resize(width === 330 ? 740 : 330);
+  assert.equal(highlightedValue(), 39505, "The chosen year remains highlighted after resizing");
   assert.equal(document.querySelectorAll("#chart-q5 .is-selected").length, 2);
   verifyYearBins();
   const svgCount = document.querySelectorAll(".chart-host svg").length;
@@ -179,14 +200,14 @@ async function verifyWidth(width) {
   assert.equal(document.querySelectorAll(".chart-host svg").length, svgCount, "Resizing must not duplicate charts");
 
   filter("group", "Motorcyclists");
-  assert.equal(total("q1"), 8883);
+  assert.equal(highlightedValue(), 8883);
   assert.equal(total("q3"), 8883);
   assert.equal(total("q5") / 2, 8883);
   assert.equal(tableRows("q5").length, 1);
   assert.ok(marks("e1").every(mark => mark.__data__.row[mark.__data__.series] === 100));
   assert.equal(document.querySelector("#chart-q5 .road-icon").textContent, "🏍️", "A filtered category keeps its matching icon");
   filter("sex", "Female");
-  assert.equal(total("q1"), 992, "Joint road-user and sex filters must use real intersected counts");
+  assert.equal(highlightedValue(), 992, "Joint road-user and sex filters must use real intersected counts");
   assert.equal(total("q3"), 992);
   assert.match(explanation("q4"), /Female: 992 \(100\.0%\)/);
   assert.equal(document.querySelectorAll("#chart-q4 .pie-panel").length, 1);
@@ -196,7 +217,7 @@ async function verifyWidth(width) {
   const jointExpected = globalData.records.filter(row => row.year === "2021" && row.group === "Motorcyclists" && row.sex === "Female" && row.age === "40-64")
     .reduce((sum, row) => sum + row.cases, 0);
   filter("age", "40-64");
-  assert.equal(total("q1"), jointExpected);
+  assert.equal(highlightedValue(), jointExpected);
   assert.equal(total("q3"), jointExpected);
   assert.equal(tableRows("q3").length, 1);
   const csv = await downloadCSV(page, "q3");
@@ -212,7 +233,8 @@ async function verifyWidth(width) {
   assert.equal(tableRows("q3").length, 11);
   filter("year", "2019");
   assert.equal(tableRows("q3").length, 1, "The global year must also apply to trend view");
-  assert.equal(total("q1"), 14499);
+  assert.equal(highlightedValue(), 14499);
+  assert.equal(total("q1"), 144106, "Sex filters still apply to the full Q1 annual context");
   assert.equal(document.getElementById("filter-year").disabled, false);
   assert.match(explanation("q3"), /2019/);
   validGeometry();
@@ -242,6 +264,12 @@ async function verifyWidth(width) {
 
   reset();
   filter("age", "Unknown");
+  filter("year", "2011");
+  assert.equal(highlightedValue(), 0);
+  assert.equal(total("q1"), 1, "A zero-case highlighted year must not hide nonzero years in the trend");
+  assert.equal(document.querySelectorAll("#chart-q1 .zero-year-highlight").length, 1);
+  assert.match(document.getElementById("readout-q1").textContent, /2011.*0 hospitalisations/);
+  filter("year", "all");
   assert.equal(total("q1"), 1);
   assert.equal(marks("e1").length, 5, "Undefined shares in zero-case years must not be plotted as zero");
   assert.equal(marks("e1")[0].__data__.row.label, "2014");

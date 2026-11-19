@@ -1,16 +1,16 @@
 <!doctype html>
-<html lang="en" data-asset-version="edfefe37a11e">
+<html lang="en" data-asset-version="052e2f5c1ee6">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Explore five research questions about hospitalised road traffic injuries in Australia through interactive charts and an Australia map, using BITRE hospitalisation data.">
   <meta name="theme-color" content="#103544">
   <title>Road Injury Research | DV03_T21</title>
-  <link rel="stylesheet" href="css/style.css?v=edfefe37a11e">
-  <script src="assets/vendor/d3.v7.min.js?v=edfefe37a11e" defer></script>
-  <script src="js/global-filters.js?v=edfefe37a11e" defer></script>
-  <script src="js/d3-charts.js?v=edfefe37a11e" defer></script>
-  <script src="js/main.js?v=edfefe37a11e" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=052e2f5c1ee6">
+  <script src="assets/vendor/d3.v7.min.js?v=052e2f5c1ee6" defer></script>
+  <script src="js/global-filters.js?v=052e2f5c1ee6" defer></script>
+  <script src="js/d3-charts.js?v=052e2f5c1ee6" defer></script>
+  <script src="js/main.js?v=052e2f5c1ee6" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to research questions</a>
@@ -18,7 +18,7 @@
   <nav class="question-nav" aria-label="Research questions"><div class="wrap nav-inner"><a href="#q1"><span>Q1</span> National trend</a><a href="#q2"><span>Q2</span> States &amp; territories</a><a href="#q3"><span>Q3</span> Age groups</a><a href="#q4"><span>Q4</span> Sex comparison</a><a href="#q5"><span>Q5</span> Road users</a></div></nav>
   <main class="wrap" id="main">
     <section class="global-filters" aria-labelledby="global-filters-title">
-      <div class="global-filter-heading"><div><h2 id="global-filters-title">Filter every question</h2><p>Choose a year, road-user group, sex, and age. Your selection applies across the page.</p></div><button id="reset-filters" type="button" disabled>Reset all filters</button></div>
+      <div class="global-filter-heading"><div><h2 id="global-filters-title">Filter every question</h2><p>Choose a year, road-user group, sex, and age. Your selection applies across the page. Q1 keeps the full trend and highlights your chosen year.</p></div><button id="reset-filters" type="button" disabled>Reset all filters</button></div>
       <div class="chart-filters" role="group" aria-label="Shared filters for all questions">
         <label for="filter-year">Year<select id="filter-year" disabled><option value="all">All years · 2011–2021</option></select></label>
         <label for="filter-group">Road-user / vehicle group<select id="filter-group" disabled><option value="all">All road-user groups</option></select></label>
@@ -32,7 +32,7 @@
     <div class="interaction-guide"><span class="guide-icon" aria-hidden="true">↗</span><p><strong>Explore the charts.</strong> Click or tap a bar, map region, point or heatmap cell to turn it orange and reveal its value. Dashed lines show averages. Keyboard users can Tab to a mark and press Enter or Space.</p></div>
     <noscript><p class="notice">Enable JavaScript to explore the interactive charts. Chart explanations and the original source workbooks remain available below.</p></noscript>
     <section class="question-section" id="q1" aria-labelledby="heading-q1">
-      <div class="question-heading"><p class="eyebrow">QUESTION 01 / NATIONAL TREND</p><h2 id="heading-q1">How did hospitalized road traffic injuries in Australia change between 2011 and 2021?</h2><p class="question-intro">Explore the annual counts matching the shared filters. Select all years for the full trend, or one year for its total. The highest displayed year and the average are highlighted.</p></div>
+      <div class="question-heading"><p class="eyebrow">QUESTION 01 / NATIONAL TREND</p><h2 id="heading-q1">How did hospitalized road traffic injuries in Australia change between 2011 and 2021?</h2><p class="question-intro">All years from 2011 to 2021 stay visible. Choose a year in the shared filter to highlight its bar and compare it with the full trend. Road-user, sex, and age filters update every bar.</p></div>
       <div class="question-layout ">
         <div class="chart-frame">
       <p class="chart-filter-scope">Shared filters apply when loaded.</p><div class="chart-toolbar"><p class="chart-instruction"><span class="selection-dot"></span> Click or tap to highlight <span class="average-key">– – Average</span></p><button type="button" class="reset-chart" data-reset="q1">Reset selection</button></div>
@@ -122,7 +122,7 @@
       <details class="data-disclosure"><summary>View values and download data</summary><div class="data-table-wrap" id="table-e3b"></div><button type="button" class="download-data" data-download="e3b">Download CSV ↓</button></details>
     </div><aside class="explanation-panel"><p class="eyebrow">CHART ANALYSIS</p><div class="chart-explanation" data-explanation-key="e3b"><p>During 2016–2021, people aged 40–64 accounted for the largest shares of hospitalisations (32.82%) and bed days (34.17%). People aged 65–74 accounted for 7.31% of hospitalisations and 11.18% of bed days; those aged 75 and over accounted for 6.23% and 13.29% respectively.</p><p>The larger bed-day shares among older groups indicate longer average hospital stays relative to the overall average. By comparison, people aged 8–16 accounted for 6.61% of hospitalisations and 3.53% of bed days. These differences describe hospital resource use and should not be treated as direct measures of injury severity.</p></div></aside></div></article></div></details>
     <section class="sources-section" id="sources" aria-labelledby="sources-title"><div><p class="eyebrow">SOURCE & CONTEXT</p><h2 id="sources-title">What should you know<br> about these numbers?</h2><p>These visualisations examine the five research questions using supplied BITRE hospitalisation data. The explanations summarise the displayed patterns and the limits of each comparison.</p><a class="text-link" href="Yibo%20data/Preliminary%20Investigation%20and%20Sorting%20of%20Projects.pdf" target="_blank" rel="noopener">Read the preliminary investigation ↗</a></div><div>
-      <details open><summary>How are averages calculated?</summary><p>Averages use the displayed observations after applying the shared filters: selected years for Q1 and trend views, displayed groups for comparison views, and published jurisdictions for Q2. The sex chart averages the matching annual counts for each displayed classification. E1 excludes years with no matching cases when calculating mean shares. E2 averages its displayed changes. Each chart labels its own mean and period; calculations use full precision.</p></details>
+      <details open><summary>How are averages calculated?</summary><p>Averages use the displayed observations after applying the shared filters: all 11 years for Q1, selected years for other trend views, and displayed groups for comparison views, and published jurisdictions for Q2. The sex chart averages the matching annual counts for each displayed classification. E1 excludes years with no matching cases when calculating mean shares. E2 averages its displayed changes. Each chart labels its own mean and period; calculations use full precision.</p></details>
       <details><summary>How should comparisons be interpreted?</summary><p>These are counts and shares, rather than population-standardised or exposure-adjusted risks. Age bands have unequal widths. The map supports year plus one demographic filter and labels suppressed values as not published. Jurisdiction totals can differ from national totals because of unrecorded or migratory/offshore residence. The sex chart retains classifications outside male and female under Other / not recorded. Pie shares use the matching total within their displayed classification. Bed days measure hospital resource use and are not a direct measure of injury severity.</p><p>The source notes a series break for Victoria from 2012 and New South Wales from June 2017. These changes should be considered when interpreting national trends.</p></details>
       <details><summary>Where do the data and map come from?</summary><ul class="source-links"><li><a href="Yibo%20data/Dataset/hospitalisation_injury_publication_sep2023.xlsx" download>National hospitalisation workbook <span>XLSX ↓</span></a></li><li><a href="Yibo%20data/Dataset/state-and-territory-hospitalisation-injury-publication-2023.xlsx" download>State & territory workbook <span>XLSX ↓</span></a></li><li><a href="data/global-data.json" download>Shared filter values and source references <span>JSON ↓</span></a></li><li><a href="https://github.com/rowanhogan/australian-states" target="_blank" rel="noopener">Australian state boundaries ↗</a></li></ul><p>Chart values are extracted from the supplied workbooks. “Vehicle occupants” combines car, heavy-transport, pick-up/van and bus occupants. Map geometry is used only to draw boundaries; hospitalisation values come from the supplied BITRE workbook.</p></details>
     </div></section>

@@ -81,6 +81,8 @@ button:disabled { opacity: .6; cursor: default; }
 .explanation-context { font-size: 13px; line-height: 1.7; color: #405841; padding-bottom: 12px; border-bottom: 1px solid #d6dfcc; }
 .peak-year { fill: #b47432; }
 .peak-label { font-size: 12px; font-weight: 700; fill: #86501b; pointer-events: none; }
+.highlighted-year-label { fill: var(--orange); font-weight: 750; }
+.zero-year-highlight { stroke: var(--orange); stroke-width: 4px; pointer-events: none; }
 .sex-pies { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 .pie-panel { min-width: 0; }
 .pie-panel h4 { font-size: 15px; line-height: 1.5; color: var(--ink); margin: 14px 0 0; text-align: center; }

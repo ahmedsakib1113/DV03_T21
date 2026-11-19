@@ -61,7 +61,7 @@ window.RoadInsightFilters = (() => {
       const empty = total === 0 ? "No hospitalisations match these filters. Choose another selection or reset the filters." : null;
       const riskNote = "Counts and shares are not adjusted for population size or travel exposure and do not measure individual risk.";
       const status = document.getElementById("global-filter-status");
-      status.textContent = scope + ". " + count.format(total) + " hospitalisations match. All questions use this selection.";
+      status.textContent = scope + ". " + count.format(total) + " hospitalisations match. Q1 keeps the full trend and highlights the selected year; other questions filter to that year.";
       document.getElementById("filtered-total").textContent = count.format(total);
       document.getElementById("filtered-beds").textContent = count.format(beds);
       document.getElementById("annual-average").textContent = decimal.format(total / years.length);
@@ -72,21 +72,27 @@ window.RoadInsightFilters = (() => {
         update(key, rows, config, applied);
         const section = document.getElementById(key);
         const caption = section.querySelector(".chart-caption");
-        caption.textContent = (options.caption || "Hospitalisations") + " · " + scope + " · Source: BITRE";
+        const chartScope = options.scope || scope;
+        caption.textContent = (options.caption || "Hospitalisations") + " · " + chartScope + " · Source: BITRE";
         section.querySelector(".chart-host").setAttribute("aria-label", caption.textContent);
-        section.querySelector(".chart-filter-scope").textContent = options.unavailable || scope;
+        section.querySelector(".chart-filter-scope").textContent = options.unavailable || chartScope;
       }
 
-      const annual = grouped(records, "year", years);
+      const annual = grouped(cohort, "year", data.years);
+      const trendTotal = sum(cohort);
+      const trendScope = "2011–2021" + scope.slice(period.length) + (state.year === "all" ? "" : " · Highlighted year: " + state.year);
       show("q1", annual, {
-        type: "yearly-histogram", percent: false, averageTitle: "Average per selected year · " + period,
-        averageNote: "Arithmetic mean across " + years.length + " selected year" + (years.length === 1 ? "." : "s."), tableLabel: "Year"
-      }, { caption: "Annual hospitalisations" });
+        type: "yearly-histogram", percent: false, averageTitle: "Average per year · 2011–2021",
+        averageNote: "Arithmetic mean across all 11 years for the selected road-user, sex, and age filters.", tableLabel: "Year"
+      }, { caption: "Annual hospitalisations · full trend", scope: trendScope, period: "2011–2021",
+        filterSelection: state.year === "all" ? null : { label: state.year, series: "value" },
+        unavailable: trendTotal === 0 ? "No hospitalisations match these road-user, sex, and age filters in any year." : null });
       const peak = annual.reduce((best, row) => row.value > best.value ? row : best, annual[0]);
-      explain("q1", [total ? (years.length === 1 ?
-        "In " + period + ", the selected group recorded " + count.format(total) + " hospitalisations. Select all years to compare the annual trend." :
-        "Across " + period + ", the selected group recorded " + count.format(total) + " hospitalisations. The highest annual count was " +
-        count.format(peak.value) + " in " + peak.label + ". The annual average was " + decimal.format(total / years.length) + ".") : empty, riskNote]);
+      explain("q1", [trendTotal ? (state.year === "all" ? "Across 2011–2021, the selected group recorded " + count.format(trendTotal) + " hospitalisations." :
+        "The highlighted " + state.year + " bar shows " + count.format(total) + " hospitalisations for the selected group. All 11 years remain visible for comparison.") +
+        " The highest annual count was " + count.format(peak.value) + " in " + peak.label +
+        ". The dashed line shows the average across all 11 years: " + decimal.format(trendTotal / data.years.length) + "." :
+        "No hospitalisations match these demographic filters in any year.", riskNote]);
 
       const dimensions = ["group", "sex", "age"].filter(key => state[key] !== "all");
       const mapUnavailable = dimensions.length > 1 ?

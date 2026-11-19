@@ -66,6 +66,10 @@ const version = assetVersion();
       control.value = value;
       control.dispatchEvent(new window.Event("change", { bubbles: true }));
       assert.equal(document.getElementById("filtered-total").textContent, expected);
+      assert.equal(document.querySelectorAll("#chart-q1 .year-bin").length, 11);
+      const selectedYear = document.querySelector("#chart-q1 .year-bin.is-selected");
+      assert.equal(selectedYear.__data__.row.label, "2021");
+      assert.equal(selectedYear.__data__.row.value, Number(expected.replaceAll(",", "")));
     }
     document.getElementById("reset-filters").click();
     assert.equal(document.getElementById("filtered-total").textContent, "410,884");
