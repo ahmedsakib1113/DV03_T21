@@ -1,5 +1,4 @@
 """Build joint national filters and separate state breakdowns from supplied workbooks."""
-import csv
 import json
 import math
 from collections import defaultdict

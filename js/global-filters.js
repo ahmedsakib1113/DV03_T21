@@ -1,6 +1,6 @@
 "use strict";
 
-// Shared filter state and data aggregation. D3 drawing stays in d3-charts.js.
+// Aggregate the selected year for the question charts. D3 drawing stays in d3-charts.js.
 window.RoadInsightFilters = (() => {
   const sum = (rows, field = "cases") => rows.reduce((total, row) => total + row[field], 0);
   const count = new Intl.NumberFormat("en-AU", { maximumFractionDigits: 0 });
@@ -8,152 +8,242 @@ window.RoadInsightFilters = (() => {
   const pct = value => decimal.format(value) + "%";
 
   function init({ data, base, update, explain }) {
-    const controls = {};
-    const state = { year: "all", group: "all", sex: "all", age: "all" };
-    const definitions = {
-      year: ["All years · 2011–2021", data.years],
-      group: ["All road-user groups", data.groups],
-      sex: ["All sex classifications", data.sexes],
-      age: ["All age groups", data.ages]
-    };
-    Object.entries(definitions).forEach(([key, [label, values]]) => {
-      const select = document.getElementById("filter-" + key);
-      select.replaceChildren(new Option(label, "all"), ...values.map(value => new Option(value, value)));
+    const stateTotals = data.states.filter(row => row.dimension === "total" && row.label === "all");
+    const annualStateMax = Math.max(1, ...stateTotals.map(row => row.cases ?? 0));
+    const annualMapDomain = [0, Math.ceil(annualStateMax / 1000) * 1000];
+    const comparisonAges = data.ages.filter(age => age !== "Unknown" || data.records.some(row => row.age === age && row.cases > 0));
+    const comparisonTotals = new Map();
+    data.records.forEach(row => {
+      const key = [row.year, row.age, row.group].join("|");
+      comparisonTotals.set(key, (comparisonTotals.get(key) || 0) + row.cases);
+    });
+    const annualDifferences = new Map(data.years.map(year => [
+      year,
+      comparisonAges.flatMap(age => data.groups.map(road => {
+        const baseline = comparisonTotals.get(["2011", age, road].join("|")) || 0;
+        const current = comparisonTotals.get([year, age, road].join("|")) || 0;
+        return { age, road, label: age + " / " + road, baseline, current, value: current - baseline };
+      }))
+    ]));
+    const largestDifference = Math.max(1, ...[...annualDifferences.values()].flatMap(rows => rows.map(row => Math.abs(row.value))));
+    const heatmapColorLimit = Math.ceil(largestDifference / 100) * 100;
+    const yearInputs = [...document.querySelectorAll("[data-chart-year]")];
+    const ageButtons = document.getElementById("q3-age-buttons");
+    const formatAge = age => age.replace("-", "–");
+    let selectedYear = "all";
+    let selectedAge = "all";
+    let renderAgeView;
+
+    yearInputs.forEach(select => {
+      select.append(...data.years.map(year => new Option(year, year)));
+      select.value = selectedYear;
       select.disabled = false;
-      select.value = "all";
-      controls[key] = select;
       select.addEventListener("change", () => {
-        state[key] = select.value;
+        selectedYear = select.value;
+        yearInputs.forEach(input => { input.value = selectedYear; });
         apply();
       });
     });
-    const view = document.getElementById("q3-view");
-    view.disabled = false;
-    view.addEventListener("change", apply);
-    document.getElementById("reset-filters").disabled = false;
-    document.getElementById("reset-filters").addEventListener("click", () => {
-      Object.keys(state).forEach(key => { state[key] = "all"; controls[key].value = "all"; });
-      view.value = "comparison";
-      apply();
-    });
 
-    function matches(row, includeYear = true) {
-      return (!includeYear || state.year === "all" || row.year === state.year) &&
-        ["group", "sex", "age"].every(key => state[key] === "all" || row[key] === state[key]);
-    }
+    const ageChoices = ["all", ...data.ages.filter(age => age !== "Unknown")];
+    ageButtons.replaceChildren(...ageChoices.map(age => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.dataset.age = age;
+      button.textContent = age === "all" ? "All ages" : formatAge(age);
+      button.setAttribute("aria-controls", "chart-q3");
+      button.addEventListener("click", () => {
+        if (selectedAge === age) return;
+        selectedAge = age;
+        renderAgeView();
+      });
+      return button;
+    }));
+    ageButtons.hidden = false;
 
-    function grouped(rows, field, labels, metric = "cases") {
-      return labels.map(label => ({ label, value: sum(rows.filter(row => row[field] === label), metric) }));
-    }
+    const annual = data.years.map(label => ({ label, value: sum(data.records.filter(row => row.year === label)) }));
+    const trendTotal = sum(annual, "value");
+    const groups = data.groups;
+    const sexes = ["Male", "Female"];
 
-    function apply() {
-      const years = state.year === "all" ? data.years : [state.year];
-      const period = state.year === "all" ? "2011–2021" : state.year;
-      const records = data.records.filter(row => matches(row));
-      const cohort = data.records.filter(row => matches(row, false));
-      const groups = state.group === "all" ? data.groups : [state.group];
-      const ages = state.age === "all" ? data.ages.filter(age => age !== "Unknown" || records.some(row => row.age === age && row.cases > 0)) : [state.age];
-      const sexes = state.sex === "all" ? data.sexes.filter(sex => sex !== "Other / not recorded" || records.some(row => row.sex === sex && row.cases > 0)) : [state.sex];
+    function apply(includeSupplementary = false) {
+      const allYears = selectedYear === "all";
+      const years = allYears ? data.years : [selectedYear];
+      const period = allYears ? "2011–2021" : selectedYear;
+      const records = allYears ? data.records : data.records.filter(row => row.year === selectedYear);
+      const ages = data.ages.filter(age => age !== "Unknown" || records.some(row => row.age === age && row.cases > 0));
       const total = sum(records), beds = sum(records, "beds");
-      const selection = { ...state };
-      const scope = period + " · " + (state.group === "all" ? "All road users" : state.group) + " · " +
-        (state.sex === "all" ? "All sex classifications" : state.sex) + " · " + (state.age === "all" ? "All ages" : "Age " + state.age);
-      const empty = total === 0 ? "No hospitalisations match these filters. Choose another selection or reset the filters." : null;
+      const empty = total === 0 ? "No hospitalisations are recorded for this period." : null;
       const riskNote = "Counts and shares are not adjusted for population size or travel exposure and do not measure individual risk.";
-      const status = document.getElementById("global-filter-status");
-      status.textContent = scope + ". " + count.format(total) + " hospitalisations match. Q1 keeps the full trend and highlights the selected year; other questions filter to that year.";
-      document.getElementById("filtered-total").textContent = count.format(total);
-      document.getElementById("filtered-beds").textContent = count.format(beds);
-      document.getElementById("annual-average").textContent = decimal.format(total / years.length);
-      document.querySelectorAll(".snapshot .metric-label").forEach(label => { label.textContent = period; });
 
-      function show(key, rows, config, options = {}) {
-        const applied = { period, scope, filters: selection, unavailable: empty, ...options };
-        update(key, rows, config, applied);
+      function show(key, rows, config, options) {
+        const chartScope = options.scope || period;
+        update(key, rows, config, { period, yearFilter: selectedYear, unavailable: empty, ...options, scope: chartScope });
         const section = document.getElementById(key);
         const caption = section.querySelector(".chart-caption");
-        const chartScope = options.scope || scope;
-        caption.textContent = (options.caption || "Hospitalisations") + " · " + chartScope + " · Source: BITRE";
+        caption.textContent = options.caption + " · " + chartScope + " · Source: BITRE";
         section.querySelector(".chart-host").setAttribute("aria-label", caption.textContent);
         section.querySelector(".chart-filter-scope").textContent = options.unavailable || chartScope;
+        const kicker = section.querySelector(".analysis-kicker");
+        if (kicker) kicker.textContent = "Key finding · " + (key === "q1" ? "2011–2021" : chartScope);
       }
 
-      const annual = grouped(cohort, "year", data.years);
-      const trendTotal = sum(cohort);
-      const trendScope = "2011–2021" + scope.slice(period.length) + (state.year === "all" ? "" : " · Highlighted year: " + state.year);
+      const trendScope = "2011–2021" + (allYears ? "" : " · Highlighted year: " + selectedYear);
       show("q1", annual, {
         type: "yearly-histogram", percent: false, averageTitle: "Average per year · 2011–2021",
-        averageNote: "Arithmetic mean across all 11 years for the selected road-user, sex, and age filters.", tableLabel: "Year"
+        averageNote: "Arithmetic mean across all 11 years.", tableLabel: "Year"
       }, { caption: "Annual hospitalisations · full trend", scope: trendScope, period: "2011–2021",
-        filterSelection: state.year === "all" ? null : { label: state.year, series: "value" },
-        unavailable: trendTotal === 0 ? "No hospitalisations match these road-user, sex, and age filters in any year." : null });
+        filterSelection: allYears ? null : { label: selectedYear, series: "value" },
+        unavailable: trendTotal === 0 ? "No hospitalisations are recorded in this period." : null });
       const peak = annual.reduce((best, row) => row.value > best.value ? row : best, annual[0]);
-      explain("q1", [trendTotal ? (state.year === "all" ? "Across 2011–2021, the selected group recorded " + count.format(trendTotal) + " hospitalisations." :
-        "The highlighted " + state.year + " bar shows " + count.format(total) + " hospitalisations for the selected group. All 11 years remain visible for comparison.") +
-        " The highest annual count was " + count.format(peak.value) + " in " + peak.label +
-        ". The dashed line shows the average across all 11 years: " + decimal.format(trendTotal / data.years.length) + "." :
-        "No hospitalisations match these demographic filters in any year.", riskNote]);
+      const firstYear = annual[0], lastYear = annual[annual.length - 1];
+      const netChange = lastYear.value - firstYear.value;
+      const trendChange = netChange === 0 ? "were unchanged at the two endpoints" : firstYear.value ?
+        (netChange > 0 ? "increased" : "decreased") + " by " + count.format(Math.abs(netChange)) +
+          " (" + pct(Math.abs(netChange) / firstYear.value * 100) + ")" :
+        "increased by " + count.format(netChange) + " (percentage change unavailable because 2011 had zero cases)";
+      explain("q1", [trendTotal ?
+        "Between 2011 and 2021, road traffic hospitalisations " + trendChange +
+        ", from " + count.format(firstYear.value) + " to " + count.format(lastYear.value) +
+        ". The highest annual count was " + count.format(peak.value) + " in " + peak.label + "." +
+        (allYears ? "" : " Your highlighted year, " + selectedYear + ", recorded " + count.format(total) + " cases.") :
+        "No hospitalisations are recorded in this period.",
+        "The dashed line shows the annual average across all 11 years (" +
+        decimal.format(trendTotal / data.years.length) + "). " + riskNote]);
 
-      const dimensions = ["group", "sex", "age"].filter(key => state[key] !== "all");
-      const mapUnavailable = dimensions.length > 1 ?
-        "The source does not provide joint state counts for these demographic filters. Choose at most one of road-user group, sex or age to view the map." : null;
-      const mapDimension = dimensions[0] || "total";
-      const mapLabel = dimensions.length ? state[mapDimension] : "all";
       const mapRows = base.q2.map(row => {
-        const cells = data.states.filter(cell => years.includes(cell.year) && cell.state === row.code && cell.dimension === mapDimension && cell.label === mapLabel);
+        const cells = stateTotals.filter(cell => years.includes(cell.year) && cell.state === row.code);
         return { label: row.label, code: row.code,
           value: cells.length !== years.length || cells.some(cell => cell.cases === null) ? null : sum(cells) };
       });
       const published = mapRows.filter(row => row.value !== null);
-      show("q2", mapUnavailable ? [] : mapRows, {
+      show("q2", mapRows, {
         type: "map", percent: false, averageTitle: "Average per published jurisdiction · " + period,
+        colorDomain: allYears ? null : annualMapDomain,
         averageNote: "Arithmetic mean across " + published.length + " published jurisdiction totals. Suppressed counts are excluded.", tableLabel: "State / territory"
-      }, { caption: "Hospitalisations by state and territory", unavailable: mapUnavailable });
+      }, { caption: "Hospitalisations by state and territory", unavailable: null });
       const highestState = published.reduce((best, row) => !best || row.value > best.value ? row : best, null);
-      explain("q2", [mapUnavailable || (highestState ?
-        "For " + scope + ", " + highestState.label + " has the highest published jurisdiction count at " + count.format(highestState.value) +
-        ". Darker shading represents higher counts; grey regions are not published for the selected period." :
-        "No jurisdiction counts are published for this selection."),
-        "State totals exclude unrecorded or migratory/offshore residence and may differ from the national count. Source-suppressed values are never treated as zero. " + riskNote]);
+      const lowestState = published.reduce((best, row) => !best || row.value < best.value ? row : best, null);
+      explain("q2", [highestState ?
+        "For " + period + ", " + highestState.label + " recorded the highest published count (" +
+        count.format(highestState.value) + ")" +
+        (published.length > 1 ? ", while " + lowestState.label + " recorded the lowest (" +
+          count.format(lowestState.value) + "). The difference was " +
+          count.format(highestState.value - lowestState.value) + " hospitalisations." : ".") :
+        "No jurisdiction counts are published for this selection.",
+        "Darker map shading indicates higher counts; grey regions have unpublished or suppressed data. " +
+        "State totals exclude unrecorded or migratory/offshore residence and may differ from the national count. " +
+        "Suppressed values are not zero. " + riskNote]);
 
-      const ageTrend = view.value === "trend";
-      const ageRows = ageTrend ? years.map(year => ({ label: year,
-        ...Object.fromEntries(ages.map(age => [age, sum(records.filter(row => row.year === year && row.age === age))])) })) : grouped(records, "age", ages);
-      show("q3", ageRows, {
-        type: ageTrend ? "lines" : "bars", horizontal: true, percent: false,
-        averageTitle: ageTrend ? "Average per selected year, by age" : "Average per displayed age group",
-        averageNote: ageTrend ? "Each mean uses " + years.length + " selected annual counts." : "Arithmetic mean across the displayed age groups; age bands have unequal widths.",
-        tableLabel: ageTrend ? "Year" : "Age group"
-      }, { series: ageTrend ? ages : ["value"], caption: ageTrend ? "Age-group trend" : "Hospitalisations by age group" });
-      const ageTotals = grouped(records, "age", ages);
-      const topAge = ageTotals.reduce((best, row) => row.value > best.value ? row : best, ageTotals[0]);
-      explain("q3", [total ? "For " + scope + ", " + (topAge.label === "Unknown" ? "people with unknown age" : "people aged " + topAge.label) +
-        " recorded " + count.format(topAge.value) + " hospitalisations" + (ages.length > 1 ? ", the highest displayed age-group total" : "") +
-        ". " + (ageTrend ? "The trend view follows only the years selected in the shared filter. Select all years for the full trend." :
-        "The dashed line shows the average across the displayed age groups.") : empty,
-        "Age bands have unequal widths. " + riskNote]);
+      function bubbleTotals(labels, rows, field) {
+        return labels.map((label, colorIndex) => {
+          const matching = rows.filter(row => row[field] === label);
+          const value = sum(matching);
+          const bedDays = sum(matching, "beds");
+          return { label, value, bedDays, daysPerHospitalisation: value ? bedDays / value : null, colorIndex };
+        }).filter(row => row.value > 0).sort((a, b) => b.value - a.value);
+      }
 
-      const sexRows = groups.map(label => ({ label, ...Object.fromEntries(sexes.map(sex => [sex,
-        sum(records.filter(row => row.group === label && row.sex === sex))])) }));
+      const ageTotals = bubbleTotals(ages, records, "age");
+      const topAge = ageTotals[0];
+      const runnersUp = ageTotals.slice(1, 3).map(row => formatAge(row.label) + " (" + count.format(row.value) + ")").join(" and ");
+      renderAgeView = () => {
+        const ageGroup = selectedAge === "all" ? null : selectedAge;
+        const ageScope = ageGroup ? period + " · Ages " + formatAge(ageGroup) : period;
+        const tableLabel = ageGroup ? "Road-user group" : "Age group";
+        const rows = ageGroup ? bubbleTotals(groups, records.filter(row => row.age === ageGroup), "group") : ageTotals;
+        const caption = "Hospitalisations and reported bed days by " + tableLabel.toLowerCase();
+        [...ageButtons.children].forEach(button => button.setAttribute("aria-pressed", String(button.dataset.age === selectedAge)));
+        show("q3", rows, {
+          type: "age-bubble", percent: false,
+          averageTitle: "Average count per " + tableLabel.toLowerCase(),
+          averageNote: "Each displayed group contributes one total.",
+          tableLabel
+        }, { caption, scope: ageScope, yearFilter: null, ageGroup,
+          unavailable: rows.length ? null : "No hospitalisations are recorded for this age group in " + period + "." });
+        const bubbleGuide = "Farther right means more hospitalisations. Higher bubbles have more reported bed days per hospitalisation. Bubble size shows total reported bed days.";
+        if (!rows.length) {
+          explain("q3", ["No hospitalisations are recorded for " + (ageGroup ? "ages " + formatAge(ageGroup) + " in " : "") + period + ".", bubbleGuide]);
+          return;
+        }
+        if (ageGroup) {
+          const leading = rows[0];
+          const highestRatio = rows.reduce((highest, row) => row.daysPerHospitalisation > highest.daysPerHospitalisation ? row : highest, leading);
+          explain("q3", ["Among ages " + formatAge(ageGroup) + ", " + leading.label.toLowerCase() + " accounted for the most hospitalisations (" +
+            count.format(leading.value) + " of " + count.format(sum(rows, "value")) + "). " + highestRatio.label + " had the highest reported bed days per hospitalisation (" +
+            decimal.format(highestRatio.daysPerHospitalisation) + ").", bubbleGuide]);
+          return;
+        }
+        explain("q3", [total ? "People aged " + formatAge(topAge.label) + " recorded the most hospitalisations (" +
+          count.format(topAge.value) + ", or " + pct(topAge.value / total * 100) + " of the total), followed by ages " + runnersUp + "." : empty,
+          bubbleGuide + " The age bands have unequal widths, and counts do not measure age-specific risk."]);
+      };
+
+      renderAgeView();
+
       const sexTotals = Object.fromEntries(sexes.map(sex => [sex, sum(records.filter(row => row.sex === sex))]));
-      const sexAverages = Object.fromEntries(sexes.map(sex => [sex, sexTotals[sex] / years.length]));
-      show("q4", sexRows, {
-        type: "sex-composition", percent: false, averageTitle: "Average per selected year, by sex · " + period,
-        averageNote: "Each mean uses " + years.length + " selected annual counts.", tableLabel: "Road-user group"
-      }, { series: sexes, sexTotals, averages: sexAverages, interactionRows: [{ label: "All selected road users", ...sexTotals }, ...sexRows],
-        caption: "Sex shares and road-user composition" });
-      explain("q4", [total ? "For " + scope + ", the recorded counts are " + sexes.map(sex => sex + ": " + count.format(sexTotals[sex]) +
-        " (" + pct(sexTotals[sex] / total * 100) + ")").join("; ") +
-        ". The stacked bar uses the total matching count. Each pie shows road-user composition within its own sex classification." : empty,
-        "Other / not recorded includes classifications outside male and female, as supplied in the source. A zero-count classification has no pie. " + riskNote]);
+      const otherTotal = sum(records.filter(row => row.sex === "Other / not recorded"));
+      const sexAgeRows = ages.map(age => ({
+        label: age,
+        ...Object.fromEntries(sexes.map(sex => [sex, sum(records.filter(row => row.age === age && row.sex === sex))]))
+      }));
+      const sexTotal = sexes.reduce((running, sex) => running + (sexTotals[sex] || 0), 0);
+      const q4Unavailable = sexTotal === 0 ?
+        "No male or female hospitalisations are recorded for " + period + "." : null;
+      show("q4", sexAgeRows, {
+        type: "mirrored", percent: false, averageTitle: "Average per age group · " + period,
+        averageNote: "Separate averages for each displayed sex across the selected age groups.",
+        tableLabel: "Age group"
+      }, { series: sexes, caption: "Hospitalisations by age group and sex", unavailable: q4Unavailable });
+      const maleTotal = sexTotals.Male || 0;
+      const femaleTotal = sexTotals.Female || 0;
+      const largestSexGap = sexAgeRows.reduce((best, row) => !best || Math.abs(row.Male - row.Female) >
+        Math.abs(best.Male - best.Female) ? row : best, null);
+      const sexDifference = Math.abs(maleTotal - femaleTotal);
+      const sexLeader = maleTotal === femaleTotal ? "equal counts" : (maleTotal > femaleTotal ? "more among males" : "more among females");
+      const sexSummary = "For " + period + ", males recorded " + count.format(maleTotal) + " and females recorded " +
+          count.format(femaleTotal) + " hospitalisations. The difference was " +
+          count.format(sexDifference) + " (" + sexLeader + "); males accounted for " +
+          (sexTotal ? pct(maleTotal / sexTotal * 100) : "an unavailable share") +
+          " of cases recorded as male or female." +
+          (largestSexGap ? " The largest male–female gap was in the " + largestSexGap.label +
+            " age group (" + count.format(Math.abs(largestSexGap.Male - largestSexGap.Female)) + " cases)." : "");
+      const otherNote = otherTotal > 0 ?
+        " Other / not recorded: " + count.format(otherTotal) +
+        " cases are excluded from the male/female comparison." : "";
+      explain("q4", [q4Unavailable || sexSummary + otherNote,
+        "The mirrored bars place male counts on the left and female counts on the right for each age group. " +
+        "Counts are not adjusted for population size or travel exposure; age bands have unequal widths. " + riskNote]);
 
-      const roadRows = grouped(records, "group", groups);
-      show("q5", roadRows, {
-        type: "bars", horizontal: true, percent: false, averageTitle: "Average per displayed road-user group · " + period,
-        averageNote: "Arithmetic mean across the displayed road-user groups.", tableLabel: "Road-user group"
-      }, { caption: "Hospitalisations by road-user group" });
-      explain("q5", [total ? "For " + scope + ", the road-user counts are " + roadRows.map(row => row.label + ": " + count.format(row.value) +
-        " (" + pct(row.value / total * 100) + ")").join("; ") + ". The horizontal bars compare counts. Select a bar to compare it with the average across the displayed groups." : empty, riskNote]);
+      const endYear = allYears ? data.years.at(-1) : selectedYear;
+      const differences = annualDifferences.get(endYear);
+      const comparisonScope = "2011–" + endYear;
+      show("q5", differences, {
+        type: "heatmap", percent: false, averageTitle: "Average change per displayed age × road-user cell",
+        colorLimit: heatmapColorLimit,
+        averageNote: "Arithmetic mean across the displayed differences; baseline year is 2011.",
+        label: row => row.age + " / " + row.road, tableLabel: "Age / road-user group"
+      }, { period: comparisonScope, comparisonEnd: endYear, scope: comparisonScope, annualDifferences,
+        caption: "Change in hospitalisations · " + endYear + " minus 2011" });
+      const largestRise = differences.reduce((best, row) =>
+        row.value > 0 && (!best || row.value > best.value) ? row : best, null);
+      const largestFall = differences.reduce((best, row) =>
+        row.value < 0 && (!best || row.value < best.value) ? row : best, null);
+      const changeSummary = largestRise || largestFall ?
+        (largestRise ? "The largest increase was " + count.format(largestRise.value) +
+          " hospitalisations for " + largestRise.age + " / " + largestRise.road + ". " :
+          "No displayed group increased. ") +
+        (largestFall ? "The largest decrease was " + count.format(Math.abs(largestFall.value)) +
+          " for " + largestFall.age + " / " + largestFall.road + "." :
+          "No displayed group decreased.") :
+        "All displayed age and road-user groups had zero change.";
+      explain("q5", [differences.length ?
+        "For " + comparisonScope + ", " + changeSummary :
+        "No age and road-user comparisons are available for this selection.",
+        "Each cell is the matching " + endYear + " count minus its 2011 count. Both years include all demographic groups; " +
+        "selecting 2011 gives zero change. Teal shows decreases, orange shows increases, and neutral cells show no change. " + riskNote]);
+
+      if (!includeSupplementary) return;
 
       const shares = years.map(year => {
         const rows = records.filter(row => row.year === year), denominator = sum(rows);
@@ -163,53 +253,33 @@ window.RoadInsightFilters = (() => {
       show("e1", shares, {
         type: "lines", percent: true, averageTitle: "Average annual share within the selected group",
         averageNote: "Each mean uses selected years with a nonzero matching total. Years with no cases have no defined share.", tableLabel: "Year"
-      }, { series: groups, caption: "Annual road-user shares within the filtered total" });
-      explain("e1", ["For " + scope + ", each annual percentage uses the hospitalisations matching all shared filters in that year as its denominator. " +
-        "Selecting one road-user group makes its share 100% in years with cases. Years with no matching cases have no defined percentage.", riskNote]);
-
-      const endYear = state.year === "all" ? data.years[data.years.length - 1] : state.year;
-      const before = cohort.filter(row => row.year === "2011"), after = cohort.filter(row => row.year === endYear);
-      const comparisonAges = state.age === "all" ? data.ages.filter(age => age !== "Unknown" || [...before, ...after].some(row => row.age === age && row.cases > 0)) : ages;
-      const differences = comparisonAges.flatMap(age => groups.map(road => ({ age, road, label: age + " / " + road,
-        value: sum(after.filter(row => row.age === age && row.group === road)) - sum(before.filter(row => row.age === age && row.group === road)) })));
-      show("e2", differences, {
-        type: "heatmap", percent: false, averageTitle: "Average change per displayed age × road-user cell",
-        averageNote: "Arithmetic mean across the displayed differences; baseline year is 2011.",
-        label: row => row.age + " / " + row.road, tableLabel: "Age / road-user group"
-      }, { series: ["value"], period: "2011–" + endYear, comparisonEnd: endYear,
-        unavailable: sum(before) + sum(after) === 0 ? "No matching cases occur in either comparison year." : null,
-        caption: "Change in hospitalisations · " + endYear + " minus 2011" });
-      const largestChange = differences.reduce((best, row) => Math.abs(row.value) > Math.abs(best.value) ? row : best, differences[0]);
-      explain("e2", ["For " + scope + ", " + (largestChange.value === 0 ? "all displayed cells have zero change" :
-        "the largest absolute change is " + count.format(Math.abs(largestChange.value)) +
-        (largestChange.value > 0 ? " additional" : " fewer") + " hospitalisations for " + largestChange.age + " / " + largestChange.road) +
-        ". Each cell shows the matching " + endYear + " count minus the matching 2011 count for an age and road-user group. " +
-        "The sex, age, and road-user filters apply to both years. Selecting all years compares 2021 with 2011; selecting 2011 gives zero change.", riskNote]);
+      }, { series: groups, caption: "Annual road-user shares of the national total" });
+      explain("e1", ["For " + period + ", each annual percentage uses the national hospitalisation total in that year as its denominator. " +
+        "Years with no hospitalisations have no defined percentage.", riskNote]);
 
       [["e3a", "group", groups, "Road-user group"], ["e3b", "age", ages, "Age group"]].forEach(([key, dimension, labels, tableLabel]) => {
         const rows = labels.map(label => ({ label,
           Hospitalisations: total ? sum(records.filter(row => row[dimension] === label)) / total * 100 : null,
           "Bed days": beds ? sum(records.filter(row => row[dimension] === label), "beds") / beds * 100 : null }));
         show(key, rows, {
-          type: "bars", horizontal: true, percent: true, averageTitle: "Average share per displayed " + tableLabel.toLowerCase(),
+          type: "horizontal", percent: true, averageTitle: "Average share per displayed " + tableLabel.toLowerCase(),
           averageNote: "Each mean uses the displayed groups and the selected period.", tableLabel
         }, { series: ["Hospitalisations", "Bed days"], unavailable: total === 0 || beds === 0 ?
           "Hospitalisation and bed-day shares require nonzero matching totals." : null,
           caption: "Hospitalisation and reported bed-day shares" });
         const largestGap = rows.reduce((best, row) => Math.abs(row["Bed days"] - row.Hospitalisations) >
           Math.abs(best["Bed days"] - best.Hospitalisations) ? row : best, rows[0]);
-        explain(key, [total > 0 && beds > 0 ? "For " + scope + ", " + largestGap.label + " shows the largest absolute difference between the displayed shares: " +
+        explain(key, [total > 0 && beds > 0 ? "For " + period + ", " + largestGap.label + " shows the largest absolute difference between the displayed shares: " +
           pct(largestGap.Hospitalisations) + " of hospitalisations and " + pct(largestGap["Bed days"]) + " of reported bed days (" +
           decimal.format(Math.abs(largestGap["Bed days"] - largestGap.Hospitalisations)) + " percentage points)." :
           "Shares cannot be calculated because the matching hospitalisation or reported bed-day total is zero.",
           "Hospitalisation shares use the matching hospitalisation total; bed-day shares use the matching reported bed-day total for " +
-          scope + ". Selecting one " + tableLabel.toLowerCase() + " gives it 100% of each nonzero total.",
+          period + ".",
           "Bed days describe hospital resource use. Length of stay also depends on treatment, other health conditions, and discharge arrangements, so these shares are not direct measures of injury severity."]);
       });
-      document.documentElement.dataset.filterYear = state.year;
       document.documentElement.dataset.filtersReady = "true";
     }
-    apply();
+    apply(true);
   }
   return { init };
 })();

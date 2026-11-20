@@ -70,12 +70,6 @@ function click(window, mark) {
   mark.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
 }
 
-function change(window, document, id, value) {
-  const select = document.getElementById(id);
-  select.value = value;
-  select.dispatchEvent(new window.Event("change", { bubbles: true }));
-}
-
 async function downloadCSV(page, key) {
   page.document.querySelector('[data-download="' + key + '"]').click();
   return new Promise((resolve, reject) => {
@@ -89,15 +83,12 @@ async function downloadCSV(page, key) {
 async function verifyWidth(width) {
   const page = await loadPage(width);
   const { window, document } = page;
-  const keys = ["q1", "q2", "q3", "q4", "q5", "e1", "e2", "e3a", "e3b"];
+  const keys = ["q1", "q2", "q3", "q4", "q5", "e1", "e3a", "e3b"];
   const explanation = key => document.querySelector('[data-explanation-key="' + key + '"]').textContent;
   const marks = key => [...document.querySelectorAll("#chart-" + key + " .mark")];
   const values = key => marks(key).map(mark => mark.__data__.row.value);
   const total = key => values(key).reduce((sum, value) => sum + value, 0);
-  const highlightedValue = () => document.querySelector("#chart-q1 .year-bin.is-selected").__data__.row.value;
   const tableRows = key => [...document.querySelectorAll("#table-" + key + " tbody tr")];
-  const reset = () => document.getElementById("reset-filters").click();
-  const filter = (key, value) => change(window, document, "filter-" + key, value);
   const validGeometry = () => {
     assert.deepEqual(page.errors, []);
     assert.doesNotMatch(document.querySelector("main").innerHTML, /NaN|undefined/);
@@ -107,28 +98,98 @@ async function verifyWidth(width) {
       assert.ok(mark.getAttribute("aria-label"));
     });
   };
-  const coherentLabels = year => keys.forEach(key => {
-    assert.match(document.querySelector("#" + key + " .chart-caption").textContent, new RegExp(year));
-    assert.equal(document.querySelectorAll("#table-" + key + " table").length, 1, "Tables must be replaced, not duplicated");
-  });
   assert.equal(document.documentElement.dataset.filtersReady, "true");
-  ["year", "group", "sex", "age"].forEach(key => {
-    assert.equal(document.getElementById("filter-" + key).value, "all");
-    assert.equal(document.getElementById("filter-" + key).disabled, false);
+  assert.equal(document.querySelectorAll(".snapshot, .interaction-guide, #shared-filter-panel, .question-filter-toggle, .question-filter-summary, #filter-year, #filter-group, #filter-sex, #filter-age").length, 0, "Retired summaries and shared filter UI must be removed from every question");
+  assert.equal(document.querySelectorAll(".chart-filter-scope").length, 8);
+  assert.equal(document.querySelectorAll("body > .question-nav .nav-links > a[href^='#q']").length, 5);
+  assert.equal(document.querySelectorAll(".research-content > .question-section").length, 5, "The workspace must contain exactly five primary questions");
+  assert.equal(document.querySelectorAll(".research-content > .question-section > .question-layout > .explanation-panel").length, 5, "Every research chart has a full-width analysis section");
+  assert.equal(document.querySelectorAll(".selection-insight > .chart-readout").length, 5, "Selected mark details must remain inside chart analysis");
+  const questionKeys = keys.slice(0, 5);
+  const yearPickers = [...document.querySelectorAll("[data-chart-year]")];
+  questionKeys.forEach((key, index) => {
+    const question = document.getElementById(key);
+    const layout = question.querySelector(".question-layout");
+    assert.deepEqual([...layout.children].map(child => child.classList.contains("chart-frame") ? "chart" :
+      child.classList.contains("explanation-panel") ? "analysis" :
+      child.classList.contains("data-disclosure") ? "data" : "unexpected"),
+      key === "q5" ? ["chart", "analysis"] : ["chart", "analysis", "data"],
+      key + " must show the chart and analysis before the data controls");
+    assert.equal(layout.querySelector(".analysis-title").textContent, "Chart Analysis");
+    assert.equal(layout.querySelector(".chart-explanation").children.length, 2, "Findings and context both remain available");
+    const tools = question.querySelector(".question-tools");
+    assert.equal(tools.querySelector(".download-data").textContent, "Download CSV");
+    assert.equal(tools.querySelector("summary").textContent, "View chart data");
+    assert.deepEqual([...tools.querySelectorAll(".question-pager a")].map(link => link.hash),
+      ["#" + (questionKeys[index - 1] || "research-questions"), "#" + (questionKeys[index + 1] || "sources")]);
+    assert.equal(yearPickers[index].disabled, false);
+    assert.deepEqual([...yearPickers[index].options].map(option => option.value), ["all", ...globalData.years]);
   });
-  assert.equal(document.querySelectorAll(".chart-filter-scope").length, 9);
+  assert.equal(document.getElementById("readout-q5").closest(".explanation-panel").querySelector('[data-explanation-key="q5"]').tagName, "DIV");
   assert.equal(document.getElementById("q3-year"), null, "Conflicting local year controls must be removed");
   assert.equal(document.getElementById("q4-year"), null);
   assert.equal(document.getElementById("q3-age"), null);
-  assert.equal(document.querySelectorAll(".chart-host svg").length, 12);
-  assert.equal(document.querySelectorAll("#chart-q5 svg").length, 1, "Q5 must contain only its horizontal bar chart");
+  assert.equal(document.querySelectorAll(".chart-host svg").length, 8, "The page renders one SVG for each of its eight charts");
+  assert.equal(document.querySelectorAll("#chart-q3 .bubble-point").length, 8, "Q3 includes all eight age classifications");
+  assert.equal(document.querySelectorAll("#chart-q4 .mirror-bar").length, 16, "Q4 compares male and female across eight age classifications when Unknown is present");
+  const heatmapCellCount = globalData.ages.length * globalData.groups.length;
+  assert.equal(document.querySelectorAll("#chart-q5 .heatmap-cell").length, heatmapCellCount, "Q5 includes the Unknown row in every year");
   assert.equal(document.querySelectorAll("#chart-q5 .pie-panel, #chart-q5 .pie-legend").length, 0);
   assert.equal(total("q1"), 410884);
   assert.equal(total("q3"), 410884, "Unknown age must be included in all-years totals");
-  assert.equal(document.getElementById("filtered-total").textContent, "410,884");
-  assert.equal(document.getElementById("annual-average").textContent, "37,353.1");
+  const topAgeBubble = marks("q3")[0];
+  const topAgeRecords = globalData.records.filter(row => row.age === "40-64");
+  const topAgeCases = topAgeRecords.reduce((total, row) => total + row.cases, 0);
+  const topAgeBedDays = topAgeRecords.reduce((total, row) => total + row.beds, 0);
+  assert.equal(topAgeBubble.__data__.row.value, topAgeCases);
+  assert.equal(topAgeBubble.__data__.row.bedDays, topAgeBedDays);
+  assert.equal(topAgeBubble.__data__.row.daysPerHospitalisation, topAgeBedDays / topAgeCases);
+  assert.ok([...document.querySelectorAll("#chart-q3 .bubble-label")].some(label => label.textContent === "40–64 · 5.1 d"));
+  click(window, topAgeBubble);
+  assert.match(document.getElementById("readout-q3").textContent, /687,450 reported bed days/);
+  click(window, topAgeBubble);
+  const ageBubbleCSV = await downloadCSV(page, "q3");
+  assert.match(ageBubbleCSV, /"Reported bed days","Reported bed days per hospitalisation"/);
+  assert.ok(ageBubbleCSV.includes('"40-64","' + topAgeCases + '","' + topAgeBedDays + '"'));
+  const ageButtons = [...document.querySelectorAll("#q3-age-buttons button")];
+  assert.equal(ageButtons.length, 8);
+  assert.equal(ageButtons[0].textContent, "All ages");
+  assert.equal(ageButtons[0].getAttribute("aria-pressed"), "true");
+  const nationalChart = document.querySelector("#chart-q1 svg");
+  for (const button of ageButtons.slice(1)) {
+    button.click();
+    const age = button.dataset.age;
+    const ageRecords = globalData.records.filter(row => row.age === age);
+    assert.equal(button.getAttribute("aria-pressed"), "true");
+    assert.equal(marks("q3").length, globalData.groups.length);
+    assert.equal(total("q3"), ageRecords.reduce((sum, row) => sum + row.cases, 0));
+    assert.match(document.querySelector("#table-q3 thead").textContent, /Road-user group/);
+    assert.equal(document.querySelector("#chart-q1 svg"), nationalChart);
+    if (age === "8-16") {
+      assert.match(explanation("q3"), /cyclists.*10,940/i);
+      const csv = await downloadCSV(page, "q3");
+      assert.match(csv, /"Period","Age group","Road-user group"/);
+      assert.match(csv, /"8-16","Cyclists","10940","20497"/);
+    }
+  }
+  ageButtons[0].click();
+  assert.equal(total("q3"), 410884);
+  assert.equal(marks("q4").filter(mark => mark.__data__.series === "Male").reduce((sum, mark) => sum + mark.__data__.row.Male, 0), 266763);
+  assert.equal(marks("q4").filter(mark => mark.__data__.series === "Female").reduce((sum, mark) => sum + mark.__data__.row.Female, 0), 144106);
+  assert.match(explanation("q1"), /increased by 5,472 \(16\.1%\)/, "Q1 answers the overall trend");
+  assert.match(explanation("q2"), /highest published count/);
+  assert.match(explanation("q2"), /lowest/);
+  assert.match(explanation("q3"), /% of the total/);
+  assert.match(explanation("q4"), /64\.9%/);
   assert.match(explanation("q4"), /Other \/ not recorded: 15/);
-  assert.equal(total("e2"), 5472, "Age-by-road-user differences must reconcile to national 2021 minus 2011");
+  assert.match(explanation("q5"), /largest increase was 1,376/);
+  assert.match(explanation("q5"), /largest decrease was 194/);
+  assert.equal(total("q5"), 5472, "Q5 heatmap differences must reconcile to national 2021 minus 2011");
+  assert.equal(tableRows("q5").length, heatmapCellCount);
+  const cyclist4064 = marks("q5").find(mark => mark.__data__.row.age === "40-64" && mark.__data__.row.road === "Cyclists");
+  const pedestrian1725 = marks("q5").find(mark => mark.__data__.row.age === "17-25" && mark.__data__.row.road === "Pedestrians");
+  assert.equal(cyclist4064.__data__.row.value, 1376);
+  assert.equal(pedestrian1725.__data__.row.value, -194);
   questions.forEach((question, i) => assert.equal(document.getElementById("heading-q" + (i + 1)).textContent, question));
   assert.doesNotMatch(document.body.textContent, /yibo|rowan hogan/i);
   assert.doesNotMatch(document.querySelector('meta[name="description"]').content, /yibo/i);
@@ -151,7 +212,7 @@ async function verifyWidth(width) {
   document.querySelectorAll(".chart-host svg").forEach(svg => assert.ok(svg.getAttribute("aria-label")));
   document.querySelectorAll("rect.mark").forEach(mark => {
     const style = window.getComputedStyle(mark);
-    assert.equal(style.stroke, "#174e4c", "Bars and heatmap cells must have visible outlines before interaction");
+    assert.equal(style.stroke, "rgb(23, 78, 76)", "Bars and heatmap cells must have visible outlines before interaction");
     assert.equal(style.strokeWidth, "1px");
   });
   const tooltip = document.querySelector("#chart-q1 .chart-tooltip");
@@ -176,145 +237,130 @@ async function verifyWidth(width) {
   assert.equal(tooltip.style.display, "none");
   assert.equal(peak.getAttribute("aria-pressed"), "true");
   assert.match(document.getElementById("readout-q1").textContent, /39,866/);
-  document.querySelector('[data-reset="q1"]').click();
+  click(window, peak);
   assert.equal(peak.getAttribute("aria-pressed"), "false");
   validGeometry();
 
   for (const row of data.q1) {
-    filter("year", row.label);
-    assert.equal(total("q1"), 410884, "Q1 must keep the complete trend when a year is selected");
-    assert.equal(marks("q1").length, 11, "All eleven yearly bars must remain visible");
-    assert.equal(highlightedValue(), row.value);
-    assert.equal(document.querySelectorAll("#chart-q1 .is-selected").length, 1, "Only the chosen year is selected");
-    assert.equal(document.querySelector("#chart-q1 .is-selected").getAttribute("aria-pressed"), "true");
-    assert.equal(document.querySelector("#chart-q1 .highlighted-year-label").textContent, row.label);
-    assert.equal(document.querySelectorAll("#chart-q1 .peak-year").length, 0, "Other bars keep their original colour when a year is highlighted");
-    assert.match(document.querySelector("#chart-q1 .average-label").textContent, /37,353\.1/);
-    assert.equal(total("q3"), row.value, "The shared year must update the age chart");
-    assert.equal(total("q5"), row.value, "The road-user bars must use the shared year's counts");
-    assert.equal(tableRows("q1").length, 11);
-    if (width === 740) assert.match(document.querySelector("#chart-e2 .heatmap-legend-label").textContent, new RegExp(row.label + " − 2011"));
-    coherentLabels(row.label);
+    const bar = document.querySelector("#chart-q1 .year-bin[aria-label^='" + row.label + ":']");
+    click(window, bar);
+    assert.equal(bar.getAttribute("aria-pressed"), "true");
+    assert.equal(bar.__data__.row.value, row.value);
+    assert.equal(marks("q1").length, 11, "All yearly bars remain visible");
   }
-  filter("year", "2014");
-  assert.equal(highlightedValue(), 35515);
-  assert.match(document.getElementById("readout-q1").textContent, /2014.*35,515.*below.*37,353\.1/);
+  click(window, document.querySelector("#chart-q1 .is-selected"));
+  assert.equal(document.querySelectorAll("#chart-q1 .is-selected").length, 0);
   const trendCSV = await downloadCSV(page, "q1");
-  assert.match(trendCSV, /"Highlighted year"/);
-  assert.equal(trendCSV.trim().split(/\r?\n/).length, 12, "Q1 downloads must retain the full annual context");
-  assert.match(trendCSV, /"2011–2021","2014","all","all","all","2019","39866"/);
-  click(window, document.querySelector("#chart-q1 .year-bin[aria-label^='2019:']"));
-  assert.equal(highlightedValue(), 39866);
-  document.querySelector('[data-reset="q1"]').click();
-  assert.equal(highlightedValue(), 35515, "Reset selection restores the year chosen in the shared filter");
-  filter("year", "2021");
-  assert.equal(document.getElementById("filtered-total").textContent, "39,505");
-  assert.equal(total("q2") - 740, 39035, "The map includes the ACT callout as a second selectable mark");
-  assert.equal(document.querySelectorAll("#chart-q2 path.map-state").length, 8);
-  assert.match(explanation("q4"), /Other \/ not recorded: 1/);
+  assert.equal(trendCSV.trim().split(/\r?\n/).length, 12);
+  assert.match(trendCSV, /39866/);
+  const femaleBar = marks("q4").find(mark => mark.__data__.row.label === "40-64" && mark.__data__.series === "Female");
+  click(window, femaleBar);
+  assert.equal(femaleBar.getAttribute("aria-pressed"), "true");
+  click(window, femaleBar);
+  assert.equal(femaleBar.getAttribute("aria-pressed"), "false");
   const act = [...document.querySelectorAll("#chart-q2 .map-region-list button")].find(button => button.textContent.startsWith("ACT"));
   act.click();
   assert.equal(document.querySelectorAll("#chart-q2 .is-selected").length, 2);
-  assert.match(document.getElementById("readout-q2").textContent, /740/);
-  document.querySelector('[data-reset="q2"]').click();
-  const road = document.querySelector("#chart-q5 .mark[aria-label^='Vehicle occupants:']");
-  click(window, road);
-  assert.equal(document.querySelectorAll("#chart-q5 .is-selected").length, 1);
+  act.click();
+  assert.equal(document.getElementById("q3-view"), null);
+  assert.equal(document.getElementById("q3-age-buttons").hidden, false);
+  assert.equal(total("q3"), 410884);
+  assert.equal(document.querySelectorAll("#chart-q3 .bubble-point").length, 8);
+  click(window, cyclist4064);
   await page.resize(width === 330 ? 740 : 330);
-  assert.equal(highlightedValue(), 39505, "The chosen year remains highlighted after resizing");
   assert.equal(document.querySelectorAll("#chart-q5 .is-selected").length, 1);
   verifyYearBins();
-  const svgCount = document.querySelectorAll(".chart-host svg").length;
   await page.resize(width);
-  assert.equal(document.querySelectorAll(".chart-host svg").length, svgCount, "Resizing must not duplicate charts");
-
-  filter("group", "Motorcyclists");
-  assert.equal(highlightedValue(), 8883);
-  assert.equal(total("q3"), 8883);
-  assert.equal(total("q5"), 8883);
-  assert.equal(tableRows("q5").length, 1);
-  assert.ok(marks("e1").every(mark => mark.__data__.row[mark.__data__.series] === 100));
-  filter("sex", "Female");
-  assert.equal(highlightedValue(), 992, "Joint road-user and sex filters must use real intersected counts");
-  assert.equal(total("q3"), 992);
-  assert.match(explanation("q4"), /Female: 992 \(100\.0%\)/);
-  assert.equal(document.querySelectorAll("#chart-q4 .pie-panel").length, 1);
-  assert.match(document.querySelector("#chart-q2 .empty-message").textContent, /does not provide joint state counts/);
-  assert.equal(document.querySelectorAll("#chart-q2 .mark").length, 0, "Unsupported joint filters must clear stale map values");
-  assert.equal(document.querySelector('[data-download="q2"]').disabled, true);
-  const jointExpected = globalData.records.filter(row => row.year === "2021" && row.group === "Motorcyclists" && row.sex === "Female" && row.age === "40-64")
-    .reduce((sum, row) => sum + row.cases, 0);
-  filter("age", "40-64");
-  assert.equal(highlightedValue(), jointExpected);
-  assert.equal(total("q3"), jointExpected);
-  assert.equal(tableRows("q3").length, 1);
-  const csv = await downloadCSV(page, "q3");
-  assert.match(csv, /"Year filter","Road-user filter","Sex filter","Age filter"/);
-  assert.match(csv, /"2021","2021","Motorcyclists","Female","40-64","40-64"/);
-  assert.ok(csv.includes('"' + jointExpected + '"'));
-  assert.equal(page.downloadName(), "q3-2021-hospitalisation-data.csv");
-  validGeometry();
-
-  reset();
-  filter("sex", "Female");
-  change(window, document, "q3-view", "trend");
-  assert.equal(tableRows("q3").length, 11);
-  filter("year", "2019");
-  assert.equal(tableRows("q3").length, 1, "The global year must also apply to trend view");
-  assert.equal(highlightedValue(), 14499);
-  assert.equal(total("q1"), 144106, "Sex filters still apply to the full Q1 annual context");
-  assert.equal(document.getElementById("filter-year").disabled, false);
-  assert.match(explanation("q3"), /2019/);
-  validGeometry();
-
-  reset();
-  filter("year", "2011");
-  filter("age", "0-7");
-  assert.match(document.querySelector("#chart-q2 .map-state[aria-label^='Australian Capital Territory:']").getAttribute("aria-label"), /not published/);
-  const suppressed = document.querySelector("#chart-q2 .map-state[aria-label^='Australian Capital Territory:']");
-  assert.equal(suppressed.getAttribute("fill"), "#d9dfdc");
-  click(window, suppressed);
-  assert.match(document.getElementById("readout-q2").textContent, /not published/);
-  const mapCSV = await downloadCSV(page, "q2");
-  assert.match(mapCSV, /"Australian Capital Territory","Not published"/);
-  assert.equal(total("e2"), 0, "The baseline year compared with itself has zero changes");
-  validGeometry();
-
-  reset();
-  filter("year", "2011");
-  filter("age", "Unknown");
-  filter("sex", "Female");
-  assert.equal(document.getElementById("filtered-total").textContent, "0");
-  assert.match(document.querySelector("#chart-q1 .empty-message").textContent, /No hospitalisations match/);
-  assert.match(document.querySelector("#chart-e3a .empty-message").textContent, /nonzero/);
-  assert.equal(document.querySelector('[data-download="q1"]').disabled, true);
-  validGeometry();
-
-  reset();
-  filter("age", "Unknown");
-  filter("year", "2011");
-  assert.equal(highlightedValue(), 0);
-  assert.equal(total("q1"), 1, "A zero-case highlighted year must not hide nonzero years in the trend");
-  assert.equal(document.querySelectorAll("#chart-q1 .zero-year-highlight").length, 1);
-  assert.match(document.getElementById("readout-q1").textContent, /2011.*0 hospitalisations/);
-  filter("year", "all");
-  assert.equal(total("q1"), 1);
-  assert.equal(marks("e1").length, 5, "Undefined shares in zero-case years must not be plotted as zero");
-  assert.equal(marks("e1")[0].__data__.row.label, "2014");
-  validGeometry();
-  reset();
-  assert.equal(total("q1"), 410884);
-  assert.equal(document.querySelectorAll(".chart-host svg").length, 12);
-  assert.equal(document.querySelectorAll("#chart-q2 .map-state").length, 8, "Reset restores the map after unsupported filters");
+  assert.equal(document.querySelectorAll(".chart-host svg").length, 8);
+  assert.equal(document.querySelectorAll("#chart-q2 .map-state").length, 8);
   const seriesSums = { Hospitalisations: 0, "Bed days": 0 };
   marks("e3a").forEach(mark => { seriesSums[mark.__data__.series] += mark.__data__.row[mark.__data__.series]; });
   Object.values(seriesSums).forEach(value => assert.ok(Math.abs(value - 100) < 1e-8));
+  const chooseYear = (picker, year) => {
+    picker.value = year;
+    picker.dispatchEvent(new window.Event("change", { bubbles: true }));
+  };
+  const supplementaryChart = document.querySelector("#chart-e1 svg");
+  const victoria = marks("q2").find(mark => mark.__data__.row.code === "VIC");
+  click(window, victoria);
+  let annualLegend;
+  const heatmapLegend = document.querySelector("#chart-q5 .heatmap-legend").textContent;
+  const selectedHeatmapCell = document.querySelector("#chart-q5 .heatmap-cell.is-selected");
+  const q5 = document.getElementById("q5");
+  const trendPanel = q5.querySelector(":scope > #q5-trend-detail");
+  const selectedPoint = () => document.querySelector("#q5-trend .q5-trend-point.is-active").__data__;
+  const comparisonRow = () => [...document.querySelectorAll("#q5-comparison-rows .is-active > *")].map(cell => cell.textContent);
+  const cyclingCount = year => globalData.records.filter(record =>
+    record.year === year && record.age === "40-64" && record.group === "Cyclists"
+  ).reduce((sum, record) => sum + record.cases, 0);
+  assert.equal(trendPanel.hidden, false);
+  assert.equal(q5.querySelector(".q5-trend-toggle"), null);
+  assert.equal(trendPanel.previousElementSibling, q5.querySelector(".question-layout"));
+  assert.equal(trendPanel.nextElementSibling, q5.querySelector(".question-tools"));
+  assert.equal(trendPanel.nextElementSibling, q5.lastElementChild);
+  assert.equal(document.querySelectorAll("#q5-trend .q5-trend-point").length, 11);
+  assert.equal(document.querySelectorAll("#q5-comparison-rows tr").length, globalData.groups.length);
+  for (const [index, row] of data.q1.entries()) {
+    chooseYear(yearPickers[index % yearPickers.length], row.label);
+    assert.ok(yearPickers.every(picker => picker.value === row.label));
+    assert.equal(marks("q1").length, 11);
+    assert.equal(document.querySelector("#chart-q1 .is-selected").__data__.row.label, row.label);
+    assert.equal(total("q3"), row.value);
+    assert.equal(total("q5"), row.value - data.q1[0].value);
+    assert.equal(marks("q5").length, heatmapCellCount);
+    assert.equal(document.querySelector("#chart-q5 .heatmap-legend").textContent, heatmapLegend);
+    assert.equal(document.querySelector("#chart-q5 .heatmap-cell.is-selected"), selectedHeatmapCell);
+    assert.deepEqual([...document.querySelectorAll("#chart-q5 .is-cell-axis")].map(tick => tick.__data__), ["40-64", "Cyclists"]);
+    assert.equal(selectedPoint().year, row.label);
+    assert.equal(selectedPoint().value, cyclingCount(row.label) - cyclingCount("2011"));
+    assert.equal(document.getElementById("q5-comparison-year").textContent, row.label);
+    assert.deepEqual(comparisonRow().slice(0, 3),
+      ["Cyclists", cyclingCount("2011").toLocaleString("en-AU"), cyclingCount(row.label).toLocaleString("en-AU")]);
+    if (row.label === "2011") assert.ok(values("q5").every(value => value === 0));
+    const records = globalData.records.filter(record => record.year === row.label);
+    const recordsBySex = sex => records.filter(record => record.sex === sex).reduce((sum, record) => sum + record.cases, 0);
+    for (const sex of ["Male", "Female"]) {
+      const chartTotal = marks("q4").filter(mark => mark.__data__.series === sex)
+        .reduce((sum, mark) => sum + mark.__data__.row[sex], 0);
+      assert.equal(chartTotal, recordsBySex(sex));
+    }
+    const actTotal = globalData.states.find(record => record.year === row.label && record.state === "ACT" && record.dimension === "total");
+    const actMark = marks("q2").find(mark => mark.__data__.row.code === "ACT");
+    assert.equal(actMark.__data__.row.value, actTotal.cases);
+    const legend = document.querySelector("#chart-q2 .map-legend").textContent;
+    annualLegend ??= legend;
+    assert.equal(legend, annualLegend, "The map uses one colour scale for every year");
+    const selectedState = document.querySelector("#chart-q2 .map-state.is-selected");
+    assert.equal(selectedState.__data__.row.code, "VIC");
+    assert.equal(document.querySelector("#chart-q2").classList.contains("has-map-selection"), true);
+    const vicTotal = globalData.states.find(record => record.year === row.label && record.state === "VIC" && record.dimension === "total");
+    assert.equal(document.querySelector("#readout-q2 strong").textContent, vicTotal.cases.toLocaleString("en-AU"));
+    assert.equal(document.querySelector("#chart-e1 svg"), supplementaryChart);
+  }
+  click(window, document.querySelector("#chart-q5 .heatmap-cell[aria-pressed=false][aria-label^='17-25 / Pedestrians']"));
+  assert.equal(selectedPoint().value, -194);
+  assert.equal(comparisonRow()[0], "Pedestrians");
+  assert.equal(comparisonRow().at(-1), "−194");
+  assert.match(document.querySelector("#readout-q5").textContent, /Ages 17–25 · Pedestrians.*−194/);
+  assert.equal(trendPanel.hidden, false);
+  click(window, document.querySelector("#chart-q2 .map-state.is-selected"));
+  assert.equal(document.querySelector("#chart-q2").classList.contains("has-map-selection"), false);
+  ageButtons.find(button => button.dataset.age === "8-16").click();
+  chooseYear(yearPickers[2], "2014");
+  assert.equal(document.querySelector("#q3-age-buttons [aria-pressed=true]").dataset.age, "8-16");
+  const cyclist = marks("q3").find(mark => mark.__data__.row.label === "Cyclists").__data__.row;
+  const cyclistLabel = [...document.querySelectorAll("#chart-q3 .bubble-label")].find(label => label.__data__.label === "Cyclists");
+  assert.ok(cyclistLabel.textContent.endsWith(" · " + cyclist.daysPerHospitalisation.toFixed(1) + " d"));
+  assert.match(await downloadCSV(page, "q3"), /"2014","8-16","Cyclists"/);
+  const csv2014 = await downloadCSV(page, "q2");
+  assert.match(csv2014, /"2014","2014","all","all","all","Australian Capital Territory"/);
+  assert.equal(await downloadCSV(page, "q2"), csv2014, "Repeated downloads retain exactly the same CSV headers and rows");
   document.querySelector(".supplementary").open = true;
   await new Promise(resolve => setTimeout(resolve, 20));
-  assert.equal(document.querySelectorAll(".chart-host svg").length, 12);
+  assert.equal(document.querySelectorAll(".chart-host svg").length, 8, "The page renders one SVG for each of its eight charts");
   validGeometry();
   page.dom.window.close();
-  console.log("PASS at width " + width + ": all nine questions, every year, joint filters, map coverage and suppression, trend, CSV context, keyboard, reset, resize, no personal names, and zero-case recovery.");
+  console.log("PASS at width " + width + ": question controls, chart navigation targets, all 11 selectable years, age groups, map counts, CSV, keyboard, and resize.");
 }
 
 (async () => {
@@ -326,10 +372,12 @@ async function verifyWidth(width) {
   assert.equal(degraded.document.querySelectorAll("#chart-q1 .mark").length, 11);
   degraded.dom.window.close();
   const noFilters = await loadPage(740, false, true);
-  assert.equal(noFilters.document.getElementById("filter-year").disabled, true);
-  assert.match(noFilters.document.getElementById("global-filter-status").textContent, /Shared filters could not load/);
+  assert.equal(noFilters.document.getElementById("shared-filter-panel"), null);
   assert.equal(noFilters.document.querySelectorAll("#chart-q3 .mark").length, 7);
   assert.equal(noFilters.document.querySelectorAll("#chart-q4 .mark").length, 22);
+  assert.equal(noFilters.document.querySelectorAll("#chart-q5 .heatmap-cell").length, 28, "The static Q5 fallback retains the original source-category heatmap.");
+  assert.equal(noFilters.document.getElementById("q5-trend-detail").hidden, true);
+  assert.ok(noFilters.document.querySelector("#q5 > .question-tools > .download-data:not([disabled])"));
   noFilters.dom.window.close();
   console.log("PASS map-load and shared-data failure: usable original charts and reference data remain available.");
 })().catch(error => { console.error(error); process.exitCode = 1; });

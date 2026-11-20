@@ -46,5 +46,5 @@ Suggested plan:
 2. How do hospitalized road traffic injuries vary across Australian states and territories?
 3. Which age groups account for the highest numbers of hospitalized road traffic injuries?
 4. How do hospitalized road traffic injuries differ between males and females?
-5. How do injury numbers differ among road user groups, such as vehicle occupants, motorcyclists, cyclists, and pedestrians?
+5. How did hospitalisations change by age and road user between 2011 and 2021?
 
