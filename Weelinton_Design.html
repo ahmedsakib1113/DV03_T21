@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+   <html lang="en">
+   <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+      <!--=============== REMIXICONS ===============-->
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.9.0/fonts/remixicon.css">
+
+      <!--=============== CSS ===============-->
+      <link rel="stylesheet" href="Weelinton.css">
+
+      <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+      <title>National Trends | Road Traffic Injuries</title>
+   </head>
+   <body>
+      <header class="header" id="header">
+         <nav class="nav">
+            <div class="nav__menu" id="nav-menu">
+               <ul class="nav__list">
+                  <li>
+                     <a href="#Vis1" class="nav__link">Vis 1</a>
+                  </li>
+
+                  <li>
+                     <a href="#Vis2" class="nav__link">Vis 2</a>
+                  </li>
+
+                  <li>
+                     <a href="#Vis3" class="nav__link">Vis 3</a>
+                  </li>
+
+                  <li>
+                     <a href="#Vis4" class="nav__link">Vis 4</a>
+                  </li>
+
+                  <li>
+                     <a href="#Vis5" class="nav__link">Vis 5</a>
+                  </li>
+
+               </ul>
+
+               <!-- Close -->
+               <button class="nav__close" id="nav-close">
+                  <i class="ri-close-large-line"></i>
+               </button>
+            </div>
+
+            <!-- Toggle -->
+            <button class="nav__toggle" id="nav-toggle" type="button" aria-label="Open navigation" aria-controls="nav-menu" aria-expanded="false">
+               <i class="ri-menu-line"></i>
+            </button>
+         </nav>
+      </header>
+
+      <main>
+         <section class="section" id="Vis1">
+            <h1> Visualization 1: National Trends </h1>
+            <h2>Hospitalised road traffic injuries in Australia, 2011–2021</h2>
+            <div class="q1-layout">
+               <div class="q1-visualization">
+                  <div class="q1-year-filter" id="q1-year-filter" role="group" aria-label="Highlight a year"></div>
+                  <div class="q1-chart" id="q1-chart" aria-label="National hospitalisation counts chart"></div>
+                  <p class="q1-chart-note">Bars and line show annual hospitalisations. The dashed line marks the 2011–2021 average.</p>
+               </div>
+               <aside class="q1-commentary" aria-labelledby="q1-commentary-title">
+                  <h3 id="q1-commentary-title">Commentary</h3>
+                  <p>Annual hospitalisations generally increased from 34,033 in 2011 to a peak of 39,866 in 2019. Across the period, the annual average was 37,353 hospitalisations. </p>
+               </aside>
+            </div>
+         </section>
+
+         <section class="section" id="Vis2">
+            <h1> Visualization 2: National road-user composition </h1>
+            <h2> </h2>
+         </section>
+
+         <section class="section" id="Vis3">
+            <h1>Visualization 3: Hospitalisations and bed-day burden</h1>
+            <h2> </h2>
+         </section>
+
+         <section class="section" id="Vis4">
+            <h1>Visualisation 4:Jurisdictional road-user composition</h1>
+            <h2> </h2>
+         </section>
+
+         <section class="section" id="Vis5">
+            <h1>Visualization 5: First Nations road-user and remoteness patterns</h1>
+            <h2>Compare hospitalisation composition by population group</h2>
+            <div class="q5-year-filter" id="q5-year-filter" role="group" aria-label="Select year for Vis5 charts"></div>
+            <div class="q5-layout">
+               <div class="q5-charts">
+                  <article class="q5-panel">
+                     <h3>Road-user composition</h3>
+                     <p class="q5-panel-subtitle">Share of hospitalisations by population (%)</p>
+                     <div class="q5-chart" id="q5-road-chart" aria-label="100 percent stacked bars comparing road-user composition"></div>
+                     <div class="q5-legend" id="q5-road-legend" aria-label="Road-user categories"></div>
+                  </article>
+                  <article class="q5-panel">
+                     <h3>Remoteness pattern</h3>
+                     <p class="q5-panel-subtitle">Share of hospitalisations by remoteness (%)</p>
+                     <div class="q5-chart" id="q5-remoteness-chart" aria-label="Slopegraph comparing remoteness shares"></div>
+                     <div class="q5-legend" id="q5-remoteness-legend" aria-label="Remoteness categories"></div>
+                  </article>
+               </div>
+               <aside class="q5-commentary q1-commentary" aria-labelledby="q5-commentary-title">
+                  <h3 id="q5-commentary-title">Commentary</h3>
+                  <p>The 2011–2021 remoteness slopegraph shows that 69.2% of Non-Indigenous injuries occurred in Major Cities, compared to only 2.1% in Remote areas. In contrast, 65.7% of First Nations injuries occurred in Regional (39.8%) and Remote (25.9%) areas.</p>
+                  <p>The road-user breakdown in the 100% stacked bar chart further highlights these differences. First Nations peoples have higher proportions of car occupant (54.3% vs. 48.2%) and pedestrian injuries (12.1% vs. 6.8%), but a lower proportion of pedal cyclist injuries (11.1% vs. 19.0%) compared to Non-Indigenous Australians. This suggests that road safety concerns for First Nations communities are more closely linked to car travel and pedestrian exposure, particularly in regional and remote areas.</p>
+               </aside>
+            </div>
+         </section>
+      </main>
+      
+      <!--=============== MAIN JS ===============-->
+      <script src="Weelinton.js" defer></script>
+      <script src="Weelinton_Q1.js" defer></script>
+      <script src="Weelinton_Q5.js" defer></script>
+   </body>
+</html>
